@@ -1,3 +1,3 @@
 ﻿
-using var game = new pxl.MainGame();
+using var game = new Pxl.MainGame();
 game.Run();
