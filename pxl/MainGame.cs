@@ -1,49 +1,45 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using pxl.Model;
-using pxl.View;
 using System.Reflection;
 
 namespace Pxl
 {
     public class MainGame : Game
     {
-        private GraphicsDeviceManager _graphics;
-        private SpriteBatch _spriteBatch;
+        private GraphicsDeviceManager graphics;
+        private SpriteBatch spriteBatch;
 
-        private GameModel _model;
-        private View _view;
-
-        private Texture2D playerTexture;
+        private GameModel model;
+        private View view;
 
         public MainGame()
         {
-            _graphics = new GraphicsDeviceManager(this);
+            //var initialScreenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+            //var initialScreenHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+            graphics = new GraphicsDeviceManager(this)
+            {
+                PreferredBackBufferWidth = 1920,
+                PreferredBackBufferHeight = 1080
+            };
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
         }
 
         protected override void Initialize()
         {
-            var player =
-                new Player(new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2), 200f);
-            var level =
-                new Level(new Rectangle(0, 0, 300, 400));
-            _model = new GameModel(player, level);
-
+            model = new GameModel((graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
+            
 
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            _spriteBatch = new SpriteBatch(GraphicsDevice);
+            spriteBatch = new SpriteBatch(GraphicsDevice);
+            view = new View(spriteBatch);
+            view.LoadContent(Content);
 
-            _model.Player.Texture = Content.Load<Texture2D>("Owlet_Monster");
-            //_model.Player.Texture = playerTexture;
-
-            _view = new View(_spriteBatch);
         }
 
         protected override void Update(GameTime gameTime)
@@ -51,24 +47,30 @@ namespace Pxl
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            KeyboardState state = Keyboard.GetState();
+            InputHandler.UpdateState();
+            model.Update(gameTime);
 
-            if (state.IsKeyDown(Keys.Left))
-            {
-                _model.Player.Move(new Vector2(-(float)gameTime.ElapsedGameTime.TotalSeconds, 0));
-            }
-            if (state.IsKeyDown(Keys.Right))
-            {
-                _model.Player.Move(new Vector2((float)gameTime.ElapsedGameTime.TotalSeconds, 0));
-            }
-            if (state.IsKeyDown(Keys.Up))
-            {
-                _model.Player.Move(new Vector2(0, -(float)gameTime.ElapsedGameTime.TotalSeconds));
-            }
-            if (state.IsKeyDown(Keys.Down))
-            {
-                _model.Player.Move(new Vector2(0, (float)gameTime.ElapsedGameTime.TotalSeconds));
-            }
+            //if (inputHandler.isRightPress) model.Player.Move(new Vector2((float)gameTime.ElapsedGameTime.TotalSeconds, 0));
+            //if (inputHandler.isLeftPress) model.Player.Move(new Vector2(-(float)gameTime.ElapsedGameTime.TotalSeconds, 0));
+            //if (inputHandler.isDownPress) model.Player.Move(new Vector2(0, (float)gameTime.ElapsedGameTime.TotalSeconds));
+            //if (inputHandler.isUpPress) model.Player.Move(new Vector2(0, -(float)gameTime.ElapsedGameTime.TotalSeconds));
+
+            //if (State.IsKeyDown(Keys.Left) || State.IsKeyDown(Keys.A))
+            //{
+            //    model.Player.Move(new Vector2(-(float)gameTime.ElapsedGameTime.TotalSeconds, 0));
+            //}
+            //if (State.IsKeyDown(Keys.Right) || State.IsKeyDown(Keys.D))
+            //{
+            //    model.Player.Move(new Vector2((float)gameTime.ElapsedGameTime.TotalSeconds, 0));
+            //}
+            //if (State.IsKeyDown(Keys.Up) || State.IsKeyDown(Keys.W))
+            //{
+            //    model.Player.Move(new Vector2(0, -(float)gameTime.ElapsedGameTime.TotalSeconds));
+            //}
+            //if ((State.IsKeyDown(Keys.Down) || State.IsKeyDown(Keys.S)) && !model.Player.CollidesWithLevel(model.Level))
+            //{
+            //   model.Player.Move(new Vector2(0, (float)gameTime.ElapsedGameTime.TotalSeconds));
+            //}
 
             base.Update(gameTime);
         }
@@ -77,7 +79,7 @@ namespace Pxl
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            _view.Draw(_model, gameTime);
+            view.Draw(model, gameTime);
 
             base.Draw(gameTime);
         }
