@@ -7,20 +7,23 @@ namespace Pxl
 {
     public class MainGame : Game
     {
+        public readonly (int Width, int Height) ScreenSize = (1856, 1024);
+
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
-
         private GameModel model;
-        private View view;
+        private GameView view;
+        private GameController _controller;
 
         public MainGame()
         {
             //var initialScreenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
             //var initialScreenHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
+
             graphics = new GraphicsDeviceManager(this)
             {
-                PreferredBackBufferWidth = 1920,
-                PreferredBackBufferHeight = 1080
+                PreferredBackBufferWidth = ScreenSize.Width,
+                PreferredBackBufferHeight = ScreenSize.Height
             };
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
@@ -29,7 +32,7 @@ namespace Pxl
         protected override void Initialize()
         {
             model = new GameModel((graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
-            
+            _controller = new GameController(model);
 
             base.Initialize();
         }
@@ -37,7 +40,7 @@ namespace Pxl
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            view = new View(spriteBatch);
+            view = new GameView(spriteBatch);
             view.LoadContent(Content);
 
         }
@@ -47,30 +50,7 @@ namespace Pxl
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            InputHandler.UpdateState();
-            model.Update(gameTime);
-
-            //if (inputHandler.isRightPress) model.Player.Move(new Vector2((float)gameTime.ElapsedGameTime.TotalSeconds, 0));
-            //if (inputHandler.isLeftPress) model.Player.Move(new Vector2(-(float)gameTime.ElapsedGameTime.TotalSeconds, 0));
-            //if (inputHandler.isDownPress) model.Player.Move(new Vector2(0, (float)gameTime.ElapsedGameTime.TotalSeconds));
-            //if (inputHandler.isUpPress) model.Player.Move(new Vector2(0, -(float)gameTime.ElapsedGameTime.TotalSeconds));
-
-            //if (State.IsKeyDown(Keys.Left) || State.IsKeyDown(Keys.A))
-            //{
-            //    model.Player.Move(new Vector2(-(float)gameTime.ElapsedGameTime.TotalSeconds, 0));
-            //}
-            //if (State.IsKeyDown(Keys.Right) || State.IsKeyDown(Keys.D))
-            //{
-            //    model.Player.Move(new Vector2((float)gameTime.ElapsedGameTime.TotalSeconds, 0));
-            //}
-            //if (State.IsKeyDown(Keys.Up) || State.IsKeyDown(Keys.W))
-            //{
-            //    model.Player.Move(new Vector2(0, -(float)gameTime.ElapsedGameTime.TotalSeconds));
-            //}
-            //if ((State.IsKeyDown(Keys.Down) || State.IsKeyDown(Keys.S)) && !model.Player.CollidesWithLevel(model.Level))
-            //{
-            //   model.Player.Move(new Vector2(0, (float)gameTime.ElapsedGameTime.TotalSeconds));
-            //}
+            _controller.Update(gameTime);
 
             base.Update(gameTime);
         }

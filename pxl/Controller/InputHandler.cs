@@ -13,20 +13,24 @@ namespace Pxl
     static class InputHandler
     {
         private static KeyboardState state = Keyboard.GetState();
+        private static KeyboardState previousState;
 
-        public static void UpdateState() => state = Keyboard.GetState();
+        public static void UpdateState()
+        {
+            previousState = state;
+            state = Keyboard.GetState();
+        }
 
         public static Vector2 GetMoveDirection()
         {
             var direction = Vector2.Zero;
+
             if (IsRightPress())
-            {
-                direction += new Vector2(1,0);
-            }
+                direction += new Vector2(1, 0);
+
             if (IsLeftPress())
-            {
                 direction -= new Vector2(1, 0);
-            }
+
             return direction;
         }
 

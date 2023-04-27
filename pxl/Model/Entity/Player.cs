@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,67 +13,173 @@ namespace Pxl
 {
     public class Player
     {
-        // CONSTANTS
-        const float GRAVITY = 30;
-        const float MAX_FALL_SPEED = 500;
-        const float MAX_SPEED = 400;
-        const float SPEED = 24f;
-        const float JUMP_SPEED = -800;
+        private const float Gravity = 30;
+        private const float MaxFallSpeed = 500;
+        private const float MaxSpeed = 400;
+        private const float Speed = 24f;
+        private const float JumpSpeed = -800;
+        private const int SpriteWidth = 66, SpriteHeight = 81;
 
         private Vector2 velocity = Vector2.Zero;
         private Level level;
-        private bool isJumping;
-        private bool isAlive = true;
+        private bool onGround;
+        private Vector2 inputDirection;
 
         public Vector2 Position { get; set; }
         public Texture2D Texture { get; set; }
-        public Rectangle Collider { get; set; }
+        public Rectangle HitBox { get; set; }
+        public List<List<Rectangle>> CollisionTiles { get; private set; }
 
         public Player(Vector2 startPosition, Level level)
         {
             Position = startPosition;
-            Collider = new Rectangle((int)Position.X, (int)Position.Y, 100, 100);
+            HitBox = new Rectangle((int)Position.X, (int)Position.Y, 64, 80);
             this.level = level;
+            CollisionTiles = new List<List<Rectangle>>();
         }
-
+       
         public void Update(GameTime gameTime)
         {
-            // GRAVITY
-            if (velocity.Y < MAX_FALL_SPEED) velocity.Y += GRAVITY;
+            // Gravity
+            if (velocity.Y < MaxFallSpeed) velocity.Y += Gravity;
 
-            // GET INPUT DIRECTION
-            var inputDirection = InputHandler.GetMoveDirection();
-            if (Math.Abs(velocity.X) < MAX_SPEED) velocity.X += inputDirection.X * SPEED;
+            // Get input direction
+            inputDirection = InputHandler.GetMoveDirection();
+            if (Math.Abs(velocity.X) < MaxSpeed) velocity.X += inputDirection.X * Speed;
             if (inputDirection == Vector2.Zero) velocity.X = 0;
 
-            if (CollidesWithLevel(level))
+            HandleCollisionsWithLevel();
+
+            // Jump
+            if (onGround && InputHandler.IsJumpPress())
             {
-                velocity.Y = 0;
-                isJumping = false;
+                onGround = false;
+                velocity.Y = JumpSpeed;
             }
 
-            // JUMP
-            if (InputHandler.IsJumpPress() && !isJumping && CollidesWithLevel(level))
-            {
-                isJumping = true;
-                velocity.Y = JUMP_SPEED;
-            }
-
-
-            // MOVE PLAYER'S POSITION
+            velocity.Y -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            // Move player's position
             Position += velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            UpdateCollider();
+            UpdateCollider(gameTime);
         }
 
-        private void UpdateCollider()
+        private void UpdateCollider(GameTime gameTime)
         {
-            Collider = new Rectangle((int)Position.X, (int)Position.Y, 100, 100);
+            HitBox = new Rectangle(
+                (int)Position.X + (int)(velocity.X * (float)gameTime.ElapsedGameTime.TotalSeconds), 
+                (int)Position.Y + (int)(velocity.Y * (float)gameTime.ElapsedGameTime.TotalSeconds), 
+                64, 80);
         }
 
-        public bool CollidesWithLevel(Level level)
+        public void Move(Vector2 direction) => Position += direction;
+
+        public void HandleCollisionsWithLevel()
         {
-            return Collider.Intersects(level.Bounds);
+            UpdateCollisionTiles();
+            var direction = velocity;
+            direction.Normalize();
+            if (direction.Y > 0)
+                CheckBottomCollision();
+            if (direction.Y < 0)
+                CheckTopCollision();
+            if (direction.X > 0)
+                CheckRightCollision();
+            if (direction.X < 0)
+                CheckLeftCollision();
+        }
+
+        public bool CheckRightCollision()
+        {
+            for (int i = 0; i < CollisionTiles.Count - 1; i++)
+            {
+                var tile = CollisionTiles[i][CollisionTiles[0].Count-1];
+                if (level.CollisionMap[tile.Y, tile.X] == 1)
+                {
+                    velocity.X = 0;
+                }
+            }
+            return false;
+        }
+
+        public bool CheckLeftCollision()
+        {
+            for (int i = 0; i < CollisionTiles.Count - 1; i++)
+            {
+                var tile = CollisionTiles[i][0];
+                if (level.CollisionMap[tile.Y, tile.X] == 1)
+                {
+                    velocity.X = 0;
+                }
+            }
+            return false;
+        }
+
+        public bool CheckTopCollision()
+        {
+            foreach (var tile in CollisionTiles[0])
+            {
+                if (level.CollisionMap[tile.Y, tile.X] == 1)
+                {
+                    if (level.CollisionMap[tile.Y + 1, tile.X] == 1 &&
+                        level.CollisionMap[tile.Y + 2, tile.X] == 1 &&
+                        level.CollisionMap[tile.Y + 3, tile.X] == 1) continue;
+                    velocity.Y = 0;
+                    onGround = false;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool CheckBottomCollision()
+        {
+
+            foreach (var tile in CollisionTiles[CollisionTiles.Count - 1])
+            {
+                if (level.CollisionMap[tile.Y, tile.X] == 1)
+                {
+                    if (level.CollisionMap[tile.Y - 1, tile.X] == 1) continue;
+                    velocity.Y = 0;
+                    onGround = true;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void UpdateCollisionTiles()
+        {
+            CollisionTiles.Clear();
+
+            var tileSize = level.TileSize;
+            var colliderPos = new Point(HitBox.X / tileSize, HitBox.Y / tileSize);
+            var rightColliderPos = 
+                new Point((int)Math.Ceiling((HitBox.X + HitBox.Width) / (float)tileSize), (int)Math.Ceiling((HitBox.Y + HitBox.Height) / (float)tileSize));
+
+            var tileCollider = 
+                (Width: (rightColliderPos.X - colliderPos.X), 
+                Height: (rightColliderPos.Y - colliderPos.Y));
+
+            for (int j = 0; j < tileCollider.Height; j++)
+            {
+                CollisionTiles.Add(new List<Rectangle>());
+                for (int i = 0; i < tileCollider.Width; i++)
+                {
+                    CollisionTiles[j].Add(new Rectangle((colliderPos.X + i), (colliderPos.Y + j), level.TileSize, level.TileSize));
+                }
+            }
+        }
+
+        public List<Rectangle> GetCollisionTilesInGlobal()
+        {
+            var collisionTiles = new List<Rectangle>();
+
+            foreach(var list in CollisionTiles)
+                foreach(var tile in list)
+                    collisionTiles.Add(new Rectangle(tile.X * tile.Width, tile.Y * tile.Height, tile.Width, tile.Height));
+
+            return collisionTiles;
         }
     }
 }

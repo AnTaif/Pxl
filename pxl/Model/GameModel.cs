@@ -11,30 +11,33 @@ using System.Threading.Tasks;
 
 namespace Pxl
 {
-    public enum GameState { Menu, Play, GameOver, LoadLevel }
+    public enum GameState { Menu, Play, Pause, GameOver, LoadLevel }
 
     public class GameModel
     {
-        public (int Width, int Height) ScreenSize { get; set; }
+        public readonly (int Width, int Height) Screen;
+        public readonly Map Map;
+        
         public Player Player { get; private set; }
-        public Level Level { get; private set; }
         public GameState State { get; private set; }
 
         public GameModel((int Width, int Height) screenSize)
         {
-            ScreenSize =
-                (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width, GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height);
-            State = GameState.Menu;
-            Level = new Level( new Rectangle(
-                    0, GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height - 200,
-                    GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width, 200)
-                );
-            Player = new Player(new Vector2(ScreenSize.Width / 2, ScreenSize.Height / 2), Level);
+            Screen = screenSize;
+            State = GameState.Play; // Change to menu
+            Map = new Map();
+            Player = new Player(new Vector2(200, Screen.Height - 300), Map.CurrentLevel);
         }
 
         public void Update(GameTime gameTime)
         {
             Player.Update(gameTime);
+            if (Player.Position.X >= Screen.Width)
+            {
+                Map.SetNextLevel();
+                Console.WriteLine(Map.CurrentLevel.Floor + " " + Map.CurrentLevel.Id);
+                Player.Position = new Vector2(0, Player.Position.Y);
+            }
         }
     }
 }
