@@ -11,9 +11,9 @@ namespace Pxl
 
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
+
         private GameModel model;
         private GameView view;
-        private GameController _controller;
 
         public MainGame()
         {
@@ -32,7 +32,6 @@ namespace Pxl
         protected override void Initialize()
         {
             model = new GameModel((graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
-            _controller = new GameController(model);
 
             base.Initialize();
         }
@@ -50,7 +49,8 @@ namespace Pxl
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            _controller.Update(gameTime);
+            InputHandler.UpdateState();
+            model.Update(gameTime);
 
             base.Update(gameTime);
         }
