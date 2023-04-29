@@ -9,7 +9,7 @@ namespace Pxl
 {
     public class Level
     {
-        public readonly int TileSize = 16;
+        public readonly int TileSize = 32;
         public readonly int Id;
         public readonly int Floor;
         public readonly (int Width, int Height) Size;
@@ -17,18 +17,13 @@ namespace Pxl
         public List<Tile> Tiles { get; set; }
         public int[,] CollisionMap { get; set; }
 
-        public Level(int currentFloor, int currentId)
+        public Level(int currentFloor, int currentId, List<Tile> tiles)
         {
             Floor = currentFloor;
             Id = currentId;
             Size = (1856, 1024);
 
-            Tiles = new List<Tile>
-            {
-                new Tile(new Rectangle(0, 864, 1920, 192), TileType.Ground), // Ground
-                new Tile(new Rectangle(320, 752, 240, 32), TileType.Platform), // Platform
-                new Tile(new Rectangle(1760, 760, 160, 320), TileType.Ground), // Wall
-            };
+            Tiles = tiles;
             CollisionMap = ConvertToCollisionMap(Tiles);
         }
 
@@ -47,27 +42,17 @@ namespace Pxl
                 int endY = (rect.Y + rect.Height) / TileSize;
 
                 for (int i = startY; i < endY; i++)
-                {
                     for (int j = startX; j < endX; j++)
-                    {
                         if (i >= 0 && i < tileHeight && j >= 0 && j < tileWidth)
-                        {
                             collisionMap[i, j] = 1;
-                        }
-                    }
-                }
             }
 
-            //for(int i = 0; i < Size.Height/ TileSize; i++)
-            //{
-            //    for (int j = 0; j < Size.Width/ TileSize; j++)
-            //    {
-            //        Console.Write(collisionMap[i, j]);
-            //    }
-            //    Console.WriteLine();
-            //}
-
             return collisionMap;
+        }
+
+        public bool InCollisionBounds(Rectangle rect)
+        {
+            return rect.Y >= 0 && rect.Y < CollisionMap.GetLength(0) && rect.X >= 0 && rect.X < CollisionMap.GetLength(1);
         }
     }
 }

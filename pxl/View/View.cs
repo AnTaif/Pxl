@@ -1,9 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Pxl.Model.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,40 +18,82 @@ namespace Pxl
         private Texture2D groundTexture;
         private Texture2D collisionTexture;
         private Texture2D playerColliderTexture;
+        private Background background;
+
+        // Animations
+        private Animation idleAnimation;
+        private Animation walkAnimation;
+        private Animation jumpAnimation;
 
         public GameView(SpriteBatch spriteBatch)
         {
             _spriteBatch = spriteBatch;
+            background = new Background(_spriteBatch);
         }
 
         public void LoadContent(ContentManager content)
         {
-            playerTexture = content.Load<Texture2D>("Owlet_Monster");
-            groundTexture = content.Load<Texture2D>("Ground");
+            playerTexture = content.Load<Texture2D>("Owlet/owlet");
+
+            var walkFrames = new List<Texture2D>()
+            {
+                content.Load<Texture2D>("owlet/walk/walk1"),
+                content.Load<Texture2D>("owlet/walk/walk2"),
+                content.Load<Texture2D>("owlet/walk/walk3"),
+                content.Load<Texture2D>("owlet/walk/walk4"),
+                content.Load<Texture2D>("owlet/walk/walk5"),
+                content.Load<Texture2D>("owlet/walk/walk6")
+            };
+            walkAnimation = new Animation(walkFrames);
+
+            groundTexture = content.Load<Texture2D>("stone_brick");
             collisionTexture = content.Load<Texture2D>("collision");
             playerColliderTexture = content.Load<Texture2D>("player_collision");
+
+            background.LoadContent(content);
         }
 
         public void Draw(GameModel model, GameTime gameTime)
         {
             var currentLevel = model.Map.CurrentLevel;
 
-            _spriteBatch.Begin();
+            _spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.LinearWrap, null, null);
+
+            background.Draw(gameTime);
+
             foreach (var tile in currentLevel.Tiles)
-            {
-                _spriteBatch.Draw(groundTexture, tile.Bounds, Color.White);
-            }
+                DrawFilledRectangle(tile.Bounds, groundTexture);
+
             _spriteBatch.Draw(playerTexture, model.Player.Position, Color.White);
-            
-            // TEMPORARY
-            //_spriteBatch.Draw(playerColliderTexture, model.Player.HitBox, Color.White); // HitBox
-            //foreach (var collision in model.Player.GetCollisionTilesInGlobal())
-            //{
-            //    _spriteBatch.Draw(collisionTexture, collision, Color.White); // CollisionTile
-            //}
-            // TEMPORARY
+
+            //DrawCollisions(_spriteBatch, model);
 
             _spriteBatch.End();
+        }
+
+        public void DrawFilledRectangle(Rectangle parentRect, Texture2D tileTexture)
+        {
+            var tileSize = tileTexture.Width;
+            var tileXCount = parentRect.Width / tileSize;
+            var tileYCount = parentRect.Height / tileSize;
+
+            for (int i = 0; i < tileXCount; i++)
+            {
+                for (int j = 0; j < tileYCount; j++)
+                {
+                    var position = new Rectangle(parentRect.X + i * tileSize, parentRect.Y + j * tileSize, tileSize, tileSize);
+                    _spriteBatch.Draw(tileTexture, position, Color.White);
+                }
+            }
+        }
+
+        public void DrawCollisions(SpriteBatch spriteBatch, GameModel model)
+        {
+            _spriteBatch.Draw(playerColliderTexture, model.Player.Collider, Color.White); // Collider
+            foreach (var collision in model.Player.GetCollisionTilesInGlobal())
+            {
+                _spriteBatch.Draw(collisionTexture, collision, Color.White); // CollisionTile
+            }
         }
     }
 }

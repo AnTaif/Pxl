@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Pxl
 {
-    public enum GameState { Menu, Play, Pause, GameOver, LoadLevel }
+    public enum GameState { Menu, Play, Pause, GameOver }
 
     public class GameModel
     {
@@ -24,7 +24,7 @@ namespace Pxl
         public GameModel((int Width, int Height) screenSize)
         {
             Screen = screenSize;
-            State = GameState.Play; // Change to menu
+            State = GameState.Play;
             Map = new Map();
             Player = new Player(new Vector2(200, Screen.Height - 300), Map.CurrentLevel);
         }
@@ -35,8 +35,8 @@ namespace Pxl
             if (Player.Position.X >= Screen.Width)
             {
                 Map.SetNextLevel();
-                Console.WriteLine(Map.CurrentLevel.Floor + " " + Map.CurrentLevel.Id);
-                Player.Position = new Vector2(0, Player.Position.Y);
+                Console.WriteLine($"Floor: {Map.CurrentLevel.Floor} Id: { Map.CurrentLevel.Id}");
+                Player.UpdateLevel(Map.CurrentLevel);
             }
         }
     }
