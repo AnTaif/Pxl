@@ -14,11 +14,14 @@ namespace Pxl
     internal class GameView
     {
         private SpriteBatch _spriteBatch;
+        private Background _background;
+
+        // Textures
         private Texture2D playerTexture;
         private Texture2D groundTexture;
         private Texture2D collisionTexture;
         private Texture2D playerColliderTexture;
-        private Background background;
+
 
         // Animations
         private Animation idleAnimation;
@@ -28,7 +31,7 @@ namespace Pxl
         public GameView(SpriteBatch spriteBatch)
         {
             _spriteBatch = spriteBatch;
-            background = new Background(_spriteBatch);
+            _background = new Background(_spriteBatch);
         }
 
         public void LoadContent(ContentManager content)
@@ -50,25 +53,21 @@ namespace Pxl
             collisionTexture = content.Load<Texture2D>("collision");
             playerColliderTexture = content.Load<Texture2D>("player_collision");
 
-            background.LoadContent(content);
+            _background.LoadContent(content);
         }
 
-        public void Draw(GameModel model, GameTime gameTime)
+        public void Draw(GameTime gameTime, GameModel model)
         {
             var currentLevel = model.Map.CurrentLevel;
 
-            _spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.LinearWrap, null, null);
-
-            background.Draw(gameTime);
+            _background.Draw(gameTime);
 
             foreach (var tile in currentLevel.Tiles)
                 DrawFilledRectangle(tile.Bounds, groundTexture);
 
             _spriteBatch.Draw(playerTexture, model.Player.Position, Color.White);
 
-            //DrawCollisions(_spriteBatch, model);
-
-            _spriteBatch.End();
+            DrawCollisions(_spriteBatch, model);
         }
 
         public void DrawFilledRectangle(Rectangle parentRect, Texture2D tileTexture)

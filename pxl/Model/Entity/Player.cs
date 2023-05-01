@@ -17,9 +17,9 @@ namespace Pxl
         private const float Gravity = 32;
         private const float MaxFallSpeed = 600;
         private const float MaxSpeed = 400;
-        private const float Speed = 26f;
-        private const float JumpSpeed = -850;
-        private readonly (int Width, int Height) Size = (60, 74);
+        private const float Speed = 20f;
+        private const float JumpSpeed = -700;
+        
 
         private Vector2 velocity = Vector2.Zero;
         private Level level;
@@ -28,6 +28,7 @@ namespace Pxl
 
         private GameTime gameTime;
 
+        public readonly (int Width, int Height) Size = (21, 26);
         public Vector2 Position { get; set; }
         public Texture2D Texture { get; set; }
         public Rectangle Collider { get; set; }
@@ -87,8 +88,6 @@ namespace Pxl
         {
             if (velocity.Y < MaxFallSpeed)
                 velocity.Y += Gravity;
-
-            Console.WriteLine("Apply");
         }
 
         private void UpdateCollider(GameTime gameTime)

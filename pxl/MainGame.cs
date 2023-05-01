@@ -7,41 +7,45 @@ namespace Pxl
 {
     public class MainGame : Game
     {
-        public readonly (int Width, int Height) ScreenSize = (1856, 1024);
+        public static readonly (int Width, int Height) RenderSize = (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width,
+                GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height);
+        public static readonly (int Width, int Height) WorkingSize = (960, 540);
 
-        private GraphicsDeviceManager graphics;
-        private SpriteBatch spriteBatch;
+        private GraphicsDeviceManager _graphics;
+        private SpriteBatch _spriteBatch;
+        private GameModel _model;
+        private GameView _view;
 
-        private GameModel model;
-        private GameView view;
+        private Screen _screen;
 
         public MainGame()
         {
-            //var initialScreenWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
-            //var initialScreenHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
-
-            graphics = new GraphicsDeviceManager(this)
+            _graphics = new GraphicsDeviceManager(this)
             {
-                PreferredBackBufferWidth = ScreenSize.Width,
-                PreferredBackBufferHeight = ScreenSize.Height
+                PreferredBackBufferWidth = 1440,//RenderSize.Width,
+                PreferredBackBufferHeight = 810,//RenderSize.Height,
+                //IsFullScreen = true,
+                SynchronizeWithVerticalRetrace = true
             };
-            Content.RootDirectory = "Content";
             IsMouseVisible = true;
+            Window.AllowUserResizing = true;
+
+            Content.RootDirectory = "Content";
         }
 
         protected override void Initialize()
         {
-            model = new GameModel((graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
+            _screen = new Screen(GraphicsDevice, WorkingSize.Width, WorkingSize.Height);
+            _model = new GameModel((_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight));
 
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            spriteBatch = new SpriteBatch(GraphicsDevice);
-            view = new GameView(spriteBatch);
-            view.LoadContent(Content);
-
+            _spriteBatch = new SpriteBatch(GraphicsDevice);
+            _view = new GameView(_spriteBatch);
+            _view.LoadContent(Content);
         }
 
         protected override void Update(GameTime gameTime)
@@ -50,16 +54,22 @@ namespace Pxl
                 Exit();
 
             InputHandler.UpdateState();
-            model.Update(gameTime);
+            _model.Update(gameTime);
 
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            _screen.Set();
+            GraphicsDevice.Clear(Color.Black);
 
-            view.Draw(model, gameTime);
+            _spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, Matrix.CreateScale(1f));
+            _view.Draw(gameTime, _model);
+            _spriteBatch.End();
+
+            _screen.UnSet();
+            _screen.Present(_spriteBatch);
 
             base.Draw(gameTime);
         }

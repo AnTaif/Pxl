@@ -26,13 +26,13 @@ namespace Pxl
             Screen = screenSize;
             State = GameState.Play;
             Map = new Map();
-            Player = new Player(new Vector2(200, Screen.Height - 300), Map.CurrentLevel);
+            Player = new Player(new Vector2(0, 0), Map.CurrentLevel);
         }
 
         public void Update(GameTime gameTime)
         {
             Player.Update(gameTime);
-            if (Player.Position.X >= Screen.Width)
+            if (Player.Position.X >= Map.CurrentLevel.Size.Width)
             {
                 Map.SetNextLevel();
                 Console.WriteLine($"Floor: {Map.CurrentLevel.Floor} Id: { Map.CurrentLevel.Id}");

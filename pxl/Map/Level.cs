@@ -9,7 +9,7 @@ namespace Pxl
 {
     public class Level
     {
-        public readonly int TileSize = 32;
+        public readonly int TileSize = 16;
         public readonly int Id;
         public readonly int Floor;
         public readonly (int Width, int Height) Size;
@@ -17,11 +17,11 @@ namespace Pxl
         public List<Tile> Tiles { get; set; }
         public int[,] CollisionMap { get; set; }
 
-        public Level(int currentFloor, int currentId, List<Tile> tiles)
+        public Level(int currentFloor, int currentId, (int Width, int Height) size, List<Tile> tiles)
         {
             Floor = currentFloor;
             Id = currentId;
-            Size = (1856, 1024);
+            Size = size;
 
             Tiles = tiles;
             CollisionMap = ConvertToCollisionMap(Tiles);
