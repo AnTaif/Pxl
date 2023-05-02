@@ -77,11 +77,22 @@ namespace Pxl
 
         public void ApplyHorizontalMove(Vector2 inputDirection)
         {
-            if (Math.Abs(velocity.X) < MaxSpeed) velocity.X += inputDirection.X * Speed;
-            if (inputDirection == Vector2.Zero) velocity.X = 0;
-
-            if (Position.X < 0 && inputDirection.X < 0)
+            if (inputDirection == Vector2.Zero || (Position.X < 0 && inputDirection.X < 0))
                 velocity.X = 0;
+
+            else if (Math.Sign(inputDirection.X) == Math.Sign(velocity.X))
+            {
+                if (Math.Abs(velocity.X) < MaxSpeed)
+                {
+                    velocity.X += inputDirection.X * Speed;
+                    if (Math.Abs(velocity.X) > MaxSpeed)
+                    {
+                        velocity.X = Math.Sign(velocity.X) * MaxSpeed;
+                    }
+                }
+            }
+            else // If the player is trying to move in the opposite direction, change direction immediately
+                velocity.X = inputDirection.X * Speed;
         }
 
         public void ApplyGravity()
