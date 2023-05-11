@@ -1,9 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Pxl
 {
@@ -13,9 +9,10 @@ namespace Pxl
         public readonly int Id;
         public readonly int Floor;
         public readonly (int Width, int Height) Size;
-            
-        public List<Tile> Tiles { get; set; }
-        public int[,] CollisionMap { get; set; }
+
+        public List<Entity> Entities { get; private set; }
+        public List<Tile> Tiles { get; private set; }
+        public int[,] CollisionMap { get; private set; }
 
         public Level(int currentFloor, int currentId, (int Width, int Height) size, List<Tile> tiles)
         {

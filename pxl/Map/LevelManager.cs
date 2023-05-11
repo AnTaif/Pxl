@@ -7,31 +7,26 @@ using System.Threading.Tasks;
 
 namespace Pxl
 {
-    public class Map
+    public class LevelManager
     {
         private readonly Dictionary<int, List<Level>> levelsByFloors =
             new Dictionary<int, List<Level>>();
 
         public Level CurrentLevel { get; private set; }
 
-        public Map()
+        public LevelManager()
         {
             levelsByFloors.Add(0, new List<Level>() { new Level(0, 0, (960, 540), new List<Tile>
             {
-                new Tile(new Rectangle(0, 384, 48, 128), TileType.Ground), // Wall
-                new Tile(new Rectangle(0, 496, 1000, 96), TileType.Ground), // Ground
-                new Tile(new Rectangle(320, 368, 128, 16), TileType.Platform), // Platform
-                new Tile(new Rectangle(544, 320, 128, 16), TileType.Platform), // Platform
-                new Tile(new Rectangle(928, 336, 128, 16), TileType.Platform)
-                //new Tile(new Rectangle(832, 288, 128, 16), TileType.Platform), // Platform
-                //new Tile(new Rectangle(880, 288, 80, 224), TileType.Ground), // Wall
+                new Tile(new Rectangle(0, 448, 48, 64), TileType.Solid), // Wall
+                new Tile(new Rectangle(0, 496, 1000, 96), TileType.Solid), // Ground
+                new Tile(new Rectangle(320, 400, 128, 16), TileType.Solid), // Platform
+                new Tile(new Rectangle(544, 336, 128, 16), TileType.Solid), // Platform
             }) });
-            levelsByFloors[0].Add(new Level(0, 1, (928, 512), new List<Tile>
+            levelsByFloors[0].Add(new Level(0, 1, (960, 540), new List<Tile>
             {
-                new Tile(new Rectangle(0, 496, 928, 96), TileType.Ground), // Ground
-                //new Tile(new Rectangle(160, 352, 128, 16), TileType.Platform), // Platform
-                //new Tile(new Rectangle(0, 288, 128, 16), TileType.Platform), // Platform
-                new Tile(new Rectangle(880, 384, 48, 128), TileType.Ground), // Wall
+                new Tile(new Rectangle(0, 496, 928, 96), TileType.Solid), // Ground
+                new Tile(new Rectangle(896, 448, 48, 64), TileType.Solid), // Wall
             }));
             CurrentLevel = levelsByFloors[0][0];
         }

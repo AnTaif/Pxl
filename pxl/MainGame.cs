@@ -15,6 +15,7 @@ namespace Pxl
         private SpriteBatch _spriteBatch;
         private GameModel _model;
         private GameView _view;
+        private GameController _controller;
 
         private Screen _screen;
 
@@ -22,8 +23,8 @@ namespace Pxl
         {
             _graphics = new GraphicsDeviceManager(this)
             {
-                PreferredBackBufferWidth = 1440,//RenderSize.Width,
-                PreferredBackBufferHeight = 810,//RenderSize.Height,
+                PreferredBackBufferWidth = 1440, //RenderSize.Width, //1440
+                PreferredBackBufferHeight = 810, //RenderSize.Height, //810
                 //IsFullScreen = true,
                 SynchronizeWithVerticalRetrace = true
             };
@@ -37,6 +38,8 @@ namespace Pxl
         {
             _screen = new Screen(GraphicsDevice, WorkingSize.Width, WorkingSize.Height);
             _model = new GameModel((_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight));
+            _view = new GameView();
+            _controller = new GameController(_model, _view);
 
             base.Initialize();
         }
@@ -44,8 +47,7 @@ namespace Pxl
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            _view = new GameView(_spriteBatch);
-            _view.LoadContent(Content);
+            _view.LoadContent(_spriteBatch, Content);
         }
 
         protected override void Update(GameTime gameTime)
@@ -53,7 +55,7 @@ namespace Pxl
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            InputHandler.UpdateState();
+            _controller.Update(gameTime);
             _model.Update(gameTime);
 
             base.Update(gameTime);
@@ -64,9 +66,7 @@ namespace Pxl
             _screen.Set();
             GraphicsDevice.Clear(Color.Black);
 
-            _spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, Matrix.CreateScale(1f));
             _view.Draw(gameTime, _model);
-            _spriteBatch.End();
 
             _screen.UnSet();
             _screen.Present(_spriteBatch);

@@ -1,20 +1,15 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Pxl.Model.Entity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Pxl
 {
-    internal class GameView
+    public class GameView
     {
+        public bool isDebugShowing { get; set; }
+
         private SpriteBatch _spriteBatch;
-        private Background _background;
+        private Background background;
 
         // Textures
         private Texture2D playerTexture;
@@ -22,52 +17,46 @@ namespace Pxl
         private Texture2D collisionTexture;
         private Texture2D playerColliderTexture;
 
+        // Sprites
+        private PlayerSprite playerSprite;
+       
 
-        // Animations
-        private Animation idleAnimation;
-        private Animation walkAnimation;
-        private Animation jumpAnimation;
-
-        public GameView(SpriteBatch spriteBatch)
+        public GameView()
         {
-            _spriteBatch = spriteBatch;
-            _background = new Background(_spriteBatch);
         }
 
-        public void LoadContent(ContentManager content)
+        public void LoadContent(SpriteBatch spriteBatch, ContentManager content)
         {
-            playerTexture = content.Load<Texture2D>("Owlet/owlet");
+            _spriteBatch = spriteBatch;
 
-            var walkFrames = new List<Texture2D>()
-            {
-                content.Load<Texture2D>("owlet/walk/walk1"),
-                content.Load<Texture2D>("owlet/walk/walk2"),
-                content.Load<Texture2D>("owlet/walk/walk3"),
-                content.Load<Texture2D>("owlet/walk/walk4"),
-                content.Load<Texture2D>("owlet/walk/walk5"),
-                content.Load<Texture2D>("owlet/walk/walk6")
-            };
-            walkAnimation = new Animation(walkFrames);
+            background = new Background(_spriteBatch);
+            playerSprite = new PlayerSprite();
+
+            playerSprite.LoadContent(content);
 
             groundTexture = content.Load<Texture2D>("stone_brick");
             collisionTexture = content.Load<Texture2D>("collision");
             playerColliderTexture = content.Load<Texture2D>("player_collision");
 
-            _background.LoadContent(content);
+            background.LoadContent(content);
         }
 
         public void Draw(GameTime gameTime, GameModel model)
         {
+            _spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, Matrix.CreateScale(1f));
             var currentLevel = model.Map.CurrentLevel;
 
-            _background.Draw(gameTime);
+            background.Draw(gameTime);
 
             foreach (var tile in currentLevel.Tiles)
                 DrawFilledRectangle(tile.Bounds, groundTexture);
 
-            _spriteBatch.Draw(playerTexture, model.Player.Position, Color.White);
+            _spriteBatch.Draw(playerSprite.Texture, model.Player.Position, Color.White);
 
-            DrawCollisions(_spriteBatch, model);
+            if (isDebugShowing)
+                ShowDebug(_spriteBatch, model);
+
+            _spriteBatch.End();
         }
 
         public void DrawFilledRectangle(Rectangle parentRect, Texture2D tileTexture)
@@ -86,13 +75,17 @@ namespace Pxl
             }
         }
 
+        private void ShowDebug(SpriteBatch spriteBatch, GameModel model)
+        {
+            DrawCollisions(_spriteBatch, model);
+        }
         public void DrawCollisions(SpriteBatch spriteBatch, GameModel model)
         {
             _spriteBatch.Draw(playerColliderTexture, model.Player.Collider, Color.White); // Collider
-            foreach (var collision in model.Player.GetCollisionTilesInGlobal())
-            {
-                _spriteBatch.Draw(collisionTexture, collision, Color.White); // CollisionTile
-            }
+            //foreach (var collision in model.Player.GetCollisionTilesInGlobal())
+            //{
+            //    _spriteBatch.Draw(collisionTexture, collision, Color.White); // CollisionTile
+            //}
         }
     }
 }

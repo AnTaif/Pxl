@@ -15,11 +15,16 @@ namespace Pxl
         private static KeyboardState state = Keyboard.GetState();
         private static KeyboardState previousState;
 
+        public static KeyboardState GetState() => state;
+        public static KeyboardState GetPreviousState() => previousState;
+
         public static void UpdateState()
         {
             previousState = state;
             state = Keyboard.GetState();
         }
+
+        public static bool IsPressedOnce(Keys key) => state.IsKeyDown(key) && !previousState.IsKeyDown(key);
 
         public static Vector2 GetMoveDirection()
         {
@@ -27,9 +32,11 @@ namespace Pxl
 
             if (IsRightPress())
                 direction += new Vector2(1, 0);
+            //direction.Normalize();
 
             if (IsLeftPress())
                 direction -= new Vector2(1, 0);
+            //direction.Normalize();
 
             return direction;
         }
