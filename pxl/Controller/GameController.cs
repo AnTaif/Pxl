@@ -21,8 +21,21 @@ namespace Pxl
             var inputDirection = InputHandler.GetMoveDirection();
             _model.Player.ApplyHorizontalMove(inputDirection);
 
+            if (_model.Player.OnGround)
+            {
+                if (inputDirection.X != 0)
+                {
+                    _view.PlayerSprite.PlayAnimation("walk", inputDirection);
+                }
+                else 
+                    _view.PlayerSprite.PlayAnimation("idle", inputDirection);
+            }
+
             if (InputHandler.IsJumpPress())
+            {
                 _model.Player.Jump();
+                _view.PlayerSprite.PlayAnimation("jump", inputDirection);
+            }
 
             if (InputHandler.IsPressedOnce(Keys.F3))
                 _view.isDebugShowing = !_view.isDebugShowing;

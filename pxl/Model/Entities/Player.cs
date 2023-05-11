@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Pxl.Model.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,19 +13,17 @@ namespace Pxl
 {
     public class Player
     {
-        private const float Gravity = 32;
-        private const float MaxFallSpeed = 600;
-        private const float MaxSpeed = 400;
-        private const float Speed = 20f;
-        private const float JumpSpeed = -632;
+        private const float Gravity = 26;
+        private const float MaxFallSpeed = 520;
+        private const float MaxSpeed = 270;
+        private const float Speed = 15f;
+        private const float JumpSpeed = -600;
 
         private Vector2 velocity = Vector2.Zero;
-        public Vector2 Velocity { get { return velocity; } }
-
-        private bool onGround;
-
-
         public readonly (int Width, int Height) Size = (28, 35);
+
+        public Vector2 Velocity { get { return velocity; } }
+        public bool OnGround { get; private set; }
         public Vector2 Position { get; set; }
         public Rectangle Collider { get; set; }
         public List<List<Tile>> CollisionTiles { get; private set; }
@@ -55,9 +52,9 @@ namespace Pxl
 
         public void Jump()
         {
-            if (onGround)
+            if (OnGround)
             {
-                onGround = false;
+                OnGround = false;
                 velocity.Y = JumpSpeed;
             }
         }
@@ -116,19 +113,19 @@ namespace Pxl
                             break;
 
                         velocity.Y = 0;
-                        onGround = false;
+                        OnGround = false;
                         break;
 
                     case CollisionDirection.Bottom:
                         if (collision.Type == CollisionType.None)
                         {
-                            onGround = false;
+                            OnGround = false;
                             break;
                         }
 
                         Position = new Vector2(Position.X, collision.InteractionTile.Bounds.Y - Size.Height + 1);
                         velocity.Y = 0;
-                        onGround = true;
+                        OnGround = true;
                         break;
                 }
             }

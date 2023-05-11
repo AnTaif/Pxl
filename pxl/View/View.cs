@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Pxl
 {
@@ -18,11 +20,12 @@ namespace Pxl
         private Texture2D playerColliderTexture;
 
         // Sprites
-        private PlayerSprite playerSprite;
+        public PlayerSprite PlayerSprite { get; }
        
 
         public GameView()
         {
+            PlayerSprite = new PlayerSprite();
         }
 
         public void LoadContent(SpriteBatch spriteBatch, ContentManager content)
@@ -30,10 +33,9 @@ namespace Pxl
             _spriteBatch = spriteBatch;
 
             background = new Background(_spriteBatch);
-            playerSprite = new PlayerSprite();
 
-            playerSprite.LoadContent(content);
-
+            PlayerSprite.LoadContent(content);
+           
             groundTexture = content.Load<Texture2D>("stone_brick");
             collisionTexture = content.Load<Texture2D>("collision");
             playerColliderTexture = content.Load<Texture2D>("player_collision");
@@ -48,10 +50,12 @@ namespace Pxl
 
             background.Draw(gameTime);
 
+
             foreach (var tile in currentLevel.Tiles)
                 DrawFilledRectangle(tile.Bounds, groundTexture);
 
-            _spriteBatch.Draw(playerSprite.Texture, model.Player.Position, Color.White);
+            PlayerSprite.Update(gameTime);
+            PlayerSprite.Draw(_spriteBatch, model.Player.Position);
 
             if (isDebugShowing)
                 ShowDebug(_spriteBatch, model);
@@ -79,6 +83,7 @@ namespace Pxl
         {
             DrawCollisions(_spriteBatch, model);
         }
+
         public void DrawCollisions(SpriteBatch spriteBatch, GameModel model)
         {
             _spriteBatch.Draw(playerColliderTexture, model.Player.Collider, Color.White); // Collider
@@ -86,6 +91,23 @@ namespace Pxl
             //{
             //    _spriteBatch.Draw(collisionTexture, collision, Color.White); // CollisionTile
             //}
+        }
+
+        public static List<Texture2D> LoadContentFolder(ContentManager content, string folder)
+        {
+            var dir = new DirectoryInfo(content.RootDirectory + "/" + folder);
+
+            if (!dir.Exists)
+                throw new DirectoryNotFoundException();
+
+            var result = new List<Texture2D>();
+
+            var files = dir.GetFiles("*.*");
+            foreach (FileInfo file in files)
+            {
+                result.Add(content.Load<Texture2D>(folder + "/" + file.Name.Split('.')[0]));
+            }
+            return result;
         }
     }
 }
