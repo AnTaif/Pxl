@@ -23,8 +23,8 @@ namespace Pxl
         {
             _graphics = new GraphicsDeviceManager(this)
             {
-                PreferredBackBufferWidth = 1440, //RenderSize.Width, //1440
-                PreferredBackBufferHeight = 810, //RenderSize.Height, //810
+                PreferredBackBufferWidth = 1650, //RenderSize.Width, //1440
+                PreferredBackBufferHeight = 930, //RenderSize.Height, //810
                 //IsFullScreen = true,
                 SynchronizeWithVerticalRetrace = true
             };

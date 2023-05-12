@@ -18,7 +18,7 @@ namespace Pxl
             Screen = screenSize;
             State = GameState.Play;
             Map = new LevelManager();
-            Player = new Player(new Vector2(0, 0));
+            Player = new Player(Map.CurrentLevel.SpawnPos);
 
             CollisionManager.SetLevel(Map.CurrentLevel);
         }
@@ -33,6 +33,7 @@ namespace Pxl
                 CollisionManager.SetLevel(Map.CurrentLevel);
                 Console.WriteLine($"Floor: {Map.CurrentLevel.Floor} Id: { Map.CurrentLevel.Id}");
                 Player.UpdatePosition(new Vector2(0, Player.Position.Y - 10));
+                Player.SpawnPos = Map.CurrentLevel.SpawnPos;
             }
         }
     }

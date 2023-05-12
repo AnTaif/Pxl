@@ -13,17 +13,19 @@ namespace Pxl
 {
     public class Player
     {
-        private const float Gravity = 26;
-        private const float MaxFallSpeed = 520;
-        private const float MaxSpeed = 270;
-        private const float Speed = 15f;
-        private const float JumpSpeed = -600;
+        private const float Gravity = 23;
+        private const float MaxFallSpeed = 400;
+        private const float MaxSpeed = 250;
+        private const float Speed = 14f;
+        private const float JumpSpeed = -500;
 
         private Vector2 velocity = Vector2.Zero;
         public readonly (int Width, int Height) Size = (28, 35);
 
+        public Vector2 SpawnPos { get; set; }
         public Vector2 Velocity { get { return velocity; } }
         public bool OnGround { get; private set; }
+        public bool IsAlive { get; private set; }
         public Vector2 Position { get; set; }
         public Rectangle Collider { get; set; }
         public List<List<Tile>> CollisionTiles { get; private set; }
@@ -99,6 +101,13 @@ namespace Pxl
 
             foreach (var collision in collisionsWithLevel)
             {
+                if (collision.Type == CollisionType.Spikes)
+                {
+                    IsAlive = false;
+                    Position = SpawnPos;
+                    return;
+                }
+
                 switch (collision.Direction)
                 {
                     case CollisionDirection.Right:

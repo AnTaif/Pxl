@@ -13,7 +13,6 @@ namespace Pxl
     {
         public Texture2D Texture { get; }
 
-        public void LoadContent(ContentManager content);
         public void Draw(SpriteBatch spriteBatch, Vector2 position);
     }
 }

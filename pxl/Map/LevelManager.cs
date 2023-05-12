@@ -18,16 +18,21 @@ namespace Pxl
         {
             levelsByFloors.Add(0, new List<Level>() { new Level(0, 0, (960, 540), new List<Tile>
             {
-                new Tile(new Rectangle(0, 448, 48, 64), TileType.Solid), // Wall
-                new Tile(new Rectangle(0, 496, 1000, 96), TileType.Solid), // Ground
-                new Tile(new Rectangle(320, 400, 128, 16), TileType.Solid), // Platform
-                new Tile(new Rectangle(544, 336, 128, 16), TileType.Solid), // Platform
-            }) });
+                new Tile(new Rectangle(0, 496, 1000, 96), TileType.Ground), // Ground
+                new Tile(new Rectangle(336, 432, 160, 16), TileType.Platform), // Platform
+                new Tile(new Rectangle(576, 368, 160, 32), TileType.Platform), // Platform
+                new Tile(new Rectangle(0, 448, 48, 64), TileType.Ground), // Wall
+                new Tile(new Rectangle(896, 384, 64, 128), TileType.Ground), // Wall
+            }, new Vector2(10, 350)) });
             levelsByFloors[0].Add(new Level(0, 1, (960, 540), new List<Tile>
             {
-                new Tile(new Rectangle(0, 496, 928, 96), TileType.Solid), // Ground
-                new Tile(new Rectangle(896, 448, 48, 64), TileType.Solid), // Wall
-            }));
+                new Tile(new Rectangle(0, 512, 960, 96), TileType.Ground), // Ground
+                new Tile(new Rectangle(0, 448, 250, 96), TileType.Ground), // Ground
+                new Tile(new Rectangle(368, 432, 176, 16), TileType.Platform), // Platform
+                new Tile(new Rectangle(250, 496, 454, 16), TileType.Spikes), // Spikes
+                new Tile(new Rectangle(704, 448, 900, 96), TileType.Ground), // Ground
+                 new Tile(new Rectangle(0, 384, 48, 128), TileType.Ground), // Wall
+            }, new Vector2(10, 350)));
             CurrentLevel = levelsByFloors[0][0];
         }
 

@@ -31,7 +31,7 @@ namespace Pxl
     public static class CollisionManager
     {
         private static Level _level;
-        private static int[,] _collisionMap;
+        private static CollisionType[,] _collisionMap;
         private static List<Entity> _entities;
         private static List<List<Tile>> _playerCollisions;
 
@@ -90,7 +90,7 @@ namespace Pxl
                 var tile = direction.X > 0 ? collisionTiles[i].Last() : collisionTiles[i].First();
                 if (!InCollisionBounds(tile.Bounds))
                     continue;
-                if (_collisionMap[tile.Bounds.Y, tile.Bounds.X] == 1)
+                if (_collisionMap[tile.Bounds.Y, tile.Bounds.X] != CollisionType.None)
                 {
                     return new CollisionInfo(CollisionType.Solid, collisionDirection, GetTileInGlobal(tile));
                 }
@@ -119,10 +119,12 @@ namespace Pxl
                 if (!InCollisionBounds(tile.Bounds))
                     continue;
 
-                if (_collisionMap[tile.Bounds.Y, tile.Bounds.X] == 1 &&
-                    _collisionMap[tile.Bounds.Y + ((direction.Y >= 0) ? -1 : 1), tile.Bounds.X] != 1)
+                var currentCollision = _collisionMap[tile.Bounds.Y, tile.Bounds.X];
+                var nextCollision = _collisionMap[tile.Bounds.Y + ((direction.Y >= 0) ? -1 : 1), tile.Bounds.X];
+
+                if (currentCollision != CollisionType.None && nextCollision == CollisionType.None)
                 {
-                    return new CollisionInfo(CollisionType.Solid, collisionDirection, GetTileInGlobal(tile));
+                    return new CollisionInfo(currentCollision, collisionDirection, GetTileInGlobal(tile));
                 }
             }
             return new CollisionInfo(CollisionType.None, collisionDirection);

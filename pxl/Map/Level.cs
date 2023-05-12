@@ -10,25 +10,27 @@ namespace Pxl
         public readonly int Floor;
         public readonly (int Width, int Height) Size;
 
+        public Vector2 SpawnPos { get; private set; }
         public List<Entity> Entities { get; private set; }
         public List<Tile> Tiles { get; private set; }
-        public int[,] CollisionMap { get; private set; }
+        public CollisionType[,] CollisionMap { get; private set; }
 
-        public Level(int currentFloor, int currentId, (int Width, int Height) size, List<Tile> tiles)
+        public Level(int currentFloor, int currentId, (int Width, int Height) size, List<Tile> tiles, Vector2 spawn)
         {
             Floor = currentFloor;
             Id = currentId;
             Size = size;
 
+            SpawnPos = spawn;
             Tiles = tiles;
             CollisionMap = ConvertToCollisionMap(Tiles);
         }
 
-        public int[,] ConvertToCollisionMap(List<Tile> tiles)
+        public CollisionType[,] ConvertToCollisionMap(List<Tile> tiles)
         {
             var tileHeight = Size.Height / TileSize;
             var tileWidth = Size.Width / TileSize;
-            int[,] collisionMap = new int[tileHeight, tileWidth];
+            CollisionType[,] collisionMap = new CollisionType[tileHeight, tileWidth];
 
             foreach (var tile in tiles)
             {
@@ -40,8 +42,11 @@ namespace Pxl
 
                 for (int i = startY; i < endY; i++)
                     for (int j = startX; j < endX; j++)
-                        if (i >= 0 && i < tileHeight && j >= 0 && j < tileWidth)
-                            collisionMap[i, j] = 1;
+                    {
+                        if (i >= 0 && i < tileHeight && j >= 0 && j < tileWidth && tile.Type != TileType.Empty)
+                            collisionMap[i, j] = tile.Type == TileType.Spikes ? CollisionType.Spikes : CollisionType.Solid;
+                    }
+                        
             }
 
             return collisionMap;

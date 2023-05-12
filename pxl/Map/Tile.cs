@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Pxl
 {
-    public enum TileType { Empty, Solid, Spikes }
+    public enum TileType { Empty, Ground, Platform, Spikes }
 
     public class Tile
     {
