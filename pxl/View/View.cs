@@ -139,10 +139,9 @@ namespace Pxl
         public void DrawCollisions(SpriteBatch spriteBatch, GameModel model)
         {
             _spriteBatch.Draw(textures["player_collision"], model.Player.Collider, Color.White); // Collider
-            //foreach (var collision in model.Player.GetCollisionTilesInGlobal())
-            //{
-            //    _spriteBatch.Draw(collisionTexture, collision, Color.White); // CollisionTile
-            //}
+            foreach (var collisionRow in CollisionManager.PlayerCollisions)
+                foreach(var collision in collisionRow)
+                    _spriteBatch.Draw(textures["collision"], CollisionManager.GetTileInGlobal(collision).Bounds, Color.White); // CollisionTile
         }
 
         public static List<Texture2D> LoadContentFolder(ContentManager content, string folder)

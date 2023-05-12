@@ -29,7 +29,7 @@ namespace Pxl
             Texture = content.Load<Texture2D>("Owlet/owlet");
             _currentTexture = Texture;
 
-            _animationManager.PlayAnimation(new Animation(new List<Texture2D>() { Texture }, 0.2f));
+            _animationManager.PlayAnimation(new Animation(new List<Texture2D>() { Texture }, 0.2f, "default"), "default");
 
             var rightIdleFrames = GameView.LoadContentFolder(content, "Owlet/idle/right");
             var leftIdleFrames = GameView.LoadContentFolder(content, "Owlet/idle/left");
@@ -40,12 +40,12 @@ namespace Pxl
 
             _animations = new Dictionary<string, Animation>()
             {
-                { "idle/right", new Animation(rightIdleFrames,  0.2f) },
-                { "idle/left", new Animation(leftIdleFrames,  0.2f) },
-                { "walk/right", new Animation(rightWalkFrames, 0.1f) },
-                { "walk/left", new Animation(leftWalkFrames, 0.1f) },
-                { "jump/right", new Animation(rightJumpFrames, 0.3f) },
-                { "jump/left", new Animation(leftJumpFrames, 0.3f) },
+                { "idle/right", new Animation(rightIdleFrames,  0.2f, "idle") },
+                { "idle/left", new Animation(leftIdleFrames,  0.2f, "idle") },
+                { "walk/right", new Animation(rightWalkFrames, 0.1f, "walk") },
+                { "walk/left", new Animation(leftWalkFrames, 0.1f, "walk") },
+                { "jump/right", new Animation(rightJumpFrames, 0.3f, "jump") },
+                { "jump/left", new Animation(leftJumpFrames, 0.3f, "jump") },
             };
         }
 
@@ -56,7 +56,6 @@ namespace Pxl
 
         public void PlayAnimation(string rootAnimationName, Vector2 inputDirection)
         {
-
             if (inputDirection.X != 0)
                 direction = inputDirection;
 
@@ -72,8 +71,13 @@ namespace Pxl
                 //    throw new ArgumentException("Passed animation does not exist: " + rootAnimationName);
             }
 
-            _animationManager.PlayAnimation(_animations[anim]);
+            _animationManager.PlayAnimation(_animations[anim], rootAnimationName);
         }
+
+        public void ChangeSpriteDirection(Vector2 inputDirection) 
+            => PlayAnimation(_animationManager.CurrentAnimation.RootName, inputDirection);
+
+        public Animation GetCurrentAnimation() => _animationManager.CurrentAnimation;
 
         private string GetDirectionName(Vector2 direction) => direction.X >= 0 ? "right" : "left";
 

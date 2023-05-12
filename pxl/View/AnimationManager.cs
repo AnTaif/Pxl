@@ -5,7 +5,7 @@ namespace Pxl
 {
     public class AnimationManager
     {
-        private Animation _animation;
+        public Animation CurrentAnimation { get; private set; }
         private float _timer;
 
         public Vector2 Position { get; set; }
@@ -16,35 +16,43 @@ namespace Pxl
 
         }
 
-        public void PlayAnimation(Animation animation)
+        public void PlayAnimation(Animation animation, string rootAnimationName)
         {
-            if (_animation == animation)
+            if (CurrentAnimation == animation)
                 return;
 
-            _animation = animation;
-            Reset();
+            if (CurrentAnimation?.RootName.Equals(rootAnimationName) ?? false)
+            {
+                 animation.SetFrameNumber(CurrentAnimation.FrameNumber);
+                CurrentAnimation = animation;
+            } else
+            {
+                CurrentAnimation = animation;
+                Reset();
+            }
+
         }
 
         public void Update(GameTime gameTime)
         {
             _timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            if (_timer > _animation.AnimationSpeed)
+            if (_timer > CurrentAnimation.AnimationSpeed)
             {
                 _timer = 0;
-                _animation.NextFrame();
+                CurrentAnimation.NextFrame();
             }
         }
 
         public void Reset()
         {
             _timer = 0;
-            _animation.Reset();
+            CurrentAnimation.Reset();
         }
 
         public Texture2D GetCurrentFrame()
         {
-            CurrentFrame = _animation.GetCurrentFrame();
+            CurrentFrame = CurrentAnimation.GetCurrentFrame();
             return CurrentFrame;
         }
     }

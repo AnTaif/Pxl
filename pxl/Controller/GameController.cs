@@ -24,10 +24,8 @@ namespace Pxl
             if (_model.Player.OnGround)
             {
                 if (inputDirection.X != 0)
-                {
                     _view.PlayerSprite.PlayAnimation("walk", inputDirection);
-                }
-                else 
+                else
                     _view.PlayerSprite.PlayAnimation("idle", inputDirection);
             }
 
@@ -36,6 +34,9 @@ namespace Pxl
                 _model.Player.Jump();
                 _view.PlayerSprite.PlayAnimation("jump", inputDirection);
             }
+
+            if (inputDirection.X != 0)
+                _view.PlayerSprite.ChangeSpriteDirection(inputDirection);
 
             if (InputHandler.IsPressedOnce(Keys.F3))
                 _view.isDebugShowing = !_view.isDebugShowing;
