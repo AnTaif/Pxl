@@ -31,8 +31,7 @@ namespace Pxl
             {
                 Map.SetNextLevel();
                 CollisionManager.SetLevel(Map.CurrentLevel);
-                Console.WriteLine($"Floor: {Map.CurrentLevel.Floor} Id: { Map.CurrentLevel.Id}");
-                Player.UpdatePosition(new Vector2(0, Player.Position.Y - 10));
+                Player.UpdatePosition(new Vector2(0, Player.Position.Y - 4));
                 Player.SpawnPos = Map.CurrentLevel.SpawnPos;
             }
         }

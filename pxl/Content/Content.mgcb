@@ -109,6 +109,13 @@
 /processorParam:TextureFormat=Color
 /build:collision.png
 
+#begin Fonts/BitmapMC.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Fonts/BitmapMC.spritefont
+
 #begin ground.png
 /importer:TextureImporter
 /processor:TextureProcessor

@@ -15,12 +15,14 @@ namespace Pxl
     {
         private const float Gravity = 23;
         private const float MaxFallSpeed = 400;
-        private const float MaxSpeed = 250;
-        private const float Speed = 14f;
+        private const float MaxSpeed = 220;
+        private const float Speed = 15f;
         private const float JumpSpeed = -500;
 
         private Vector2 velocity = Vector2.Zero;
         public readonly (int Width, int Height) Size = (28, 35);
+
+        public int DeathCount { get; private set; }
 
         public Vector2 SpawnPos { get; set; }
         public Vector2 Velocity { get { return velocity; } }
@@ -28,13 +30,14 @@ namespace Pxl
         public bool IsAlive { get; private set; }
         public Vector2 Position { get; set; }
         public Rectangle Collider { get; set; }
-        public List<List<Tile>> CollisionTiles { get; private set; }
+        public List<List<GameObject>> CollisionTiles { get; private set; }
 
         public Player(Vector2 startPosition)
         {
             Position = startPosition;
-            Collider = new Rectangle((int)Position.X, (int)Position.Y, Size.Width, Size.Height);
-            CollisionTiles = new List<List<Tile>>();
+            Collider = new Rectangle((int)Position.X+4, (int)Position.Y, Size.Width-4, Size.Height);
+            CollisionTiles = new List<List<GameObject>>();
+            DeathCount = 0;
         }
 
         public void Update(GameTime gameTime)
@@ -90,11 +93,11 @@ namespace Pxl
         private void UpdateCollider(GameTime gameTime)
         {
             Collider = new Rectangle(
-                (int)Position.X + (int)(velocity.X * (float)gameTime.ElapsedGameTime.TotalSeconds),
+                (int)Position.X + (int)(velocity.X * (float)gameTime.ElapsedGameTime.TotalSeconds) + Size.Width/2 - (Size.Width - 4)/2,
                 (int)Position.Y + (int)(velocity.Y * (float)gameTime.ElapsedGameTime.TotalSeconds),
-                Size.Width, Size.Height);
+                Size.Width-4, Size.Height);
         }
-
+        
         public void HandleCollisionsWithLevel()
         {
             var collisionsWithLevel = CollisionManager.GetCollisionsWithLevel(this);
@@ -103,7 +106,8 @@ namespace Pxl
             {
                 if (collision.Type == CollisionType.Spikes)
                 {
-                    IsAlive = false;
+                    //IsAlive = false;
+                    DeathCount++;
                     Position = SpawnPos;
                     return;
                 }

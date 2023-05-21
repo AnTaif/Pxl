@@ -7,34 +7,34 @@ namespace Pxl
     {
         public readonly int TileSize = 16;
         public readonly int Id;
-        public readonly int Floor;
+        public readonly int Stage;
         public readonly (int Width, int Height) Size;
 
         public Vector2 SpawnPos { get; private set; }
         public List<Entity> Entities { get; private set; }
-        public List<Tile> Tiles { get; private set; }
+        public List<GameObject> GameObjects { get; private set; }
         public CollisionType[,] CollisionMap { get; private set; }
 
-        public Level(int currentFloor, int currentId, (int Width, int Height) size, List<Tile> tiles, Vector2 spawn)
+        public Level(int currentStage, int currentId, (int Width, int Height) size, List<GameObject> gameObjects, Vector2 spawn)
         {
-            Floor = currentFloor;
+            Stage = currentStage;
             Id = currentId;
             Size = size;
 
             SpawnPos = spawn;
-            Tiles = tiles;
-            CollisionMap = ConvertToCollisionMap(Tiles);
+            GameObjects = gameObjects;
+            CollisionMap = ConvertToCollisionMap(GameObjects);
         }
 
-        public CollisionType[,] ConvertToCollisionMap(List<Tile> tiles)
+        public CollisionType[,] ConvertToCollisionMap(List<GameObject> gameObjects)
         {
             var tileHeight = Size.Height / TileSize;
             var tileWidth = Size.Width / TileSize;
             CollisionType[,] collisionMap = new CollisionType[tileHeight, tileWidth];
 
-            foreach (var tile in tiles)
+            foreach (var gameObject in gameObjects)
             {
-                var rect = tile.Bounds;
+                var rect = gameObject.Bounds;
                 int startX = rect.X / TileSize;
                 int startY = rect.Y / TileSize;
                 int endX = (rect.X + rect.Width) / TileSize;
@@ -43,10 +43,9 @@ namespace Pxl
                 for (int i = startY; i < endY; i++)
                     for (int j = startX; j < endX; j++)
                     {
-                        if (i >= 0 && i < tileHeight && j >= 0 && j < tileWidth && tile.Type != TileType.Empty)
-                            collisionMap[i, j] = tile.Type == TileType.Spikes ? CollisionType.Spikes : CollisionType.Solid;
-                    }
-                        
+                        if (i >= 0 && i < tileHeight && j >= 0 && j < tileWidth && gameObject.Type != ObjectType.Empty)
+                            collisionMap[i, j] = gameObject.Type == ObjectType.Spikes ? CollisionType.Spikes : CollisionType.Solid;
+                    } 
             }
 
             return collisionMap;

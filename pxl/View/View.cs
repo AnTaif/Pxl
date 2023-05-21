@@ -13,12 +13,11 @@ namespace Pxl
         private SpriteBatch _spriteBatch;
         private Background background;
 
-        // Textures
         private Dictionary<string, Texture2D> textures;
+        private SpriteFont bitmapMC;
 
         // Sprites
         public PlayerSprite PlayerSprite { get; }
-       
 
         public GameView()
         {
@@ -32,6 +31,8 @@ namespace Pxl
             background = new Background(_spriteBatch);
 
             PlayerSprite.LoadContent(content);
+
+            bitmapMC = content.Load<SpriteFont>("Fonts/BitmapMC");
 
             textures = new Dictionary<string, Texture2D>()
             {
@@ -52,8 +53,7 @@ namespace Pxl
 
             background.Draw(gameTime);
 
-
-            foreach (var tile in currentLevel.Tiles)
+            foreach (var tile in currentLevel.GameObjects)
                 DrawTile(tile);
 
             PlayerSprite.Update(gameTime);
@@ -87,17 +87,17 @@ namespace Pxl
             }
         }
 
-        public void DrawTile(Tile tile)
+        public void DrawTile(GameObject tile)
         {
             switch (tile.Type)
             {
-                case TileType.Ground:
+                case ObjectType.Ground:
                     DrawGroundRectangle(tile.Bounds, textures["ground"], textures["mountain_fill"]);
                     break;
-                case TileType.Platform:
+                case ObjectType.Platform:
                     DrawPlatformRectangle(tile.Bounds, textures["ground"]);
                     break;
-                case TileType.Spikes:
+                case ObjectType.Spikes:
                     DrawSpikesRectangle(tile.Bounds, textures["spikes"]);
                     break;
             }
@@ -133,6 +133,18 @@ namespace Pxl
 
         private void ShowDebug(SpriteBatch spriteBatch, GameModel model)
         {
+            spriteBatch.DrawString(bitmapMC, 
+                model.Player.Position.ToString(), new Vector2(0, 0), Color.White);
+
+            spriteBatch.DrawString(bitmapMC, 
+                "On ground: " + model.Player.OnGround.ToString(), new Vector2(0, 20), Color.White);
+
+            spriteBatch.DrawString(bitmapMC, 
+                "Death count: " + model.Player.DeathCount.ToString(), new Vector2(0, 40), Color.White);
+
+            spriteBatch.DrawString(bitmapMC, 
+                $"Stage: {model.Map.CurrentLevel.Stage} Level: {model.Map.CurrentLevel.Id}", new Vector2(0, 60), Color.White);
+            
             DrawCollisions(_spriteBatch, model);
         }
 

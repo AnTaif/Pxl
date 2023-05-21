@@ -11,11 +11,6 @@ namespace Pxl
         public Vector2 Position { get; set; }
         public Texture2D CurrentFrame { get; private set; }
 
-        public AnimationManager()
-        {
-
-        }
-
         public void PlayAnimation(Animation animation, string rootAnimationName)
         {
             if (CurrentAnimation == animation)
