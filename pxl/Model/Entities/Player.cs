@@ -30,13 +30,13 @@ namespace Pxl
         public bool IsAlive { get; private set; }
         public Vector2 Position { get; set; }
         public Rectangle Collider { get; set; }
-        public List<List<GameObject>> CollisionTiles { get; private set; }
+        public List<List<IGameObject>> CollisionTiles { get; private set; }
 
         public Player(Vector2 startPosition)
         {
             Position = startPosition;
             Collider = new Rectangle((int)Position.X+4, (int)Position.Y, Size.Width-4, Size.Height);
-            CollisionTiles = new List<List<GameObject>>();
+            CollisionTiles = new List<List<IGameObject>>();
             DeathCount = 0;
         }
 
@@ -136,7 +136,7 @@ namespace Pxl
                             break;
                         }
 
-                        Position = new Vector2(Position.X, collision.InteractionTile.Bounds.Y - Size.Height + 1);
+                        Position = new Vector2(Position.X, collision.InteractionTile.Y - Size.Height + 1);
                         velocity.Y = 0;
                         OnGround = true;
                         break;

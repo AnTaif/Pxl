@@ -8,39 +8,30 @@ using System.Threading.Tasks;
 
 namespace Pxl
 {
-    public class GroundSprite : ISprite
+    public class PlatformSprite : ISprite
     {
         private Rectangle bounds;
-        private Texture2D groundTexture;
-        private Texture2D fillTexture;
+        private Texture2D texture;
 
-        public GroundSprite(Rectangle bounds, Texture2D groundTexture, Texture2D fillTexture)
+        public PlatformSprite(Rectangle bounds, Texture2D texture)
         {
             this.bounds = bounds;
-            this.groundTexture = groundTexture;
-            this.fillTexture = fillTexture;
+            this.texture = texture;
         }
 
         public void Draw(SpriteBatch spriteBatch, Vector2 position)
         {
-            var tileSize = groundTexture.Width;
+            var tileSize = texture.Width;
             var tileXCount = bounds.Width / tileSize;
             var tileYCount = bounds.Height / tileSize;
-            
-            var ground = true;
+
             for (int j = 0; j < tileYCount; j++)
             {
                 for (int i = 0; i < tileXCount; i++)
                 {
                     var tilePosition = new Vector2(position.X + i * tileSize, position.Y + j * tileSize);
-                    if (ground)
-                    {
-                        spriteBatch.Draw(groundTexture, tilePosition, Color.White);
-                    }
-                    else
-                        spriteBatch.Draw(fillTexture, tilePosition, Color.White);
+                    spriteBatch.Draw(texture, tilePosition, Color.White);
                 }
-                ground = false;
             }
         }
     }

@@ -10,7 +10,7 @@ namespace Pxl
 
     public class CollisionInfo
     {
-        public GameObject InteractionTile { get; }
+        public Rectangle InteractionTile { get; }
         public CollisionType Type { get; }
         public CollisionDirection Direction { get; }
 
@@ -20,7 +20,7 @@ namespace Pxl
             Direction = direction;
         }
 
-        public CollisionInfo(CollisionType type, CollisionDirection direction, GameObject tileInGlobal)
+        public CollisionInfo(CollisionType type, CollisionDirection direction, Rectangle tileInGlobal)
         {
             Type = type;
             Direction = direction;
@@ -34,7 +34,7 @@ namespace Pxl
         private static CollisionType[,] _collisionMap;
         private static List<Entity> _entities;
 
-        public static List<List<GameObject>> PlayerCollisions { get; private set; }
+        public static List<List<Rectangle>> PlayerCollisions { get; private set; }
 
         public static void SetLevel(Level level)
         {
@@ -73,7 +73,7 @@ namespace Pxl
             return collisionsWithLevel;
         }
 
-        private static CollisionInfo CheckHorizontalCollision(Vector2 direction, List<List<GameObject>> collisionTiles)
+        private static CollisionInfo CheckHorizontalCollision(Vector2 direction, List<List<Rectangle>> collisionTiles)
         {
             CollisionDirection collisionDirection;
 
@@ -86,10 +86,10 @@ namespace Pxl
             {
                 var tile = direction.X > 0 ? collisionTiles[i].Last() : collisionTiles[i].First();
 
-                if (!InCollisionBounds(tile.Bounds))
+                if (!InCollisionBounds(tile))
                     continue;
 
-                if (_collisionMap[tile.Bounds.Y, tile.Bounds.X] != CollisionType.None)
+                if (_collisionMap[tile.Y, tile.X] != CollisionType.None)
                 {
                     return new CollisionInfo(CollisionType.Solid, collisionDirection, GetTileInGlobal(tile));
                 }
@@ -97,10 +97,10 @@ namespace Pxl
             return new CollisionInfo(CollisionType.None, collisionDirection);
         }
 
-        private static CollisionInfo CheckVerticalCollision(Vector2 direction, List<List<GameObject>> collisionTiles)
+        private static CollisionInfo CheckVerticalCollision(Vector2 direction, List<List<Rectangle>> collisionTiles)
         {
             CollisionDirection collisionDirection;
-            List<GameObject> collisionsToCheck;
+            List<Rectangle> collisionsToCheck;
 
             if (direction.Y >= 0)
             {
@@ -115,11 +115,11 @@ namespace Pxl
 
             foreach(var tile in collisionsToCheck)
             {
-                if (!InCollisionBounds(tile.Bounds))
+                if (!InCollisionBounds(tile))
                     continue;
 
-                var currentCollision = _collisionMap[tile.Bounds.Y, tile.Bounds.X];
-                var nextCollision = _collisionMap[tile.Bounds.Y + ((direction.Y >= 0) ? -1 : 1), tile.Bounds.X];
+                var currentCollision = _collisionMap[tile.Y, tile.X];
+                var nextCollision = _collisionMap[tile.Y + ((direction.Y >= 0) ? -1 : 1), tile.X];
 
                 if (currentCollision != CollisionType.None && nextCollision == CollisionType.None)
                 {
@@ -129,9 +129,9 @@ namespace Pxl
             return new CollisionInfo(CollisionType.None, collisionDirection);
         }
 
-        private static List<List<GameObject>> GetCollisionTiles(Player player)
+        private static List<List<Rectangle>> GetCollisionTiles(Player player)
         {
-            var collisionTiles = new List<List<GameObject>>();
+            var collisionTiles = new List<List<Rectangle>>();
             var collider = player.Collider;
 
             var tileSize = _level.TileSize;
@@ -146,36 +146,23 @@ namespace Pxl
 
             for (int j = 0; j < tileCollider.Height; j++)
             {
-                collisionTiles.Add(new List<GameObject>());
+                collisionTiles.Add(new List<Rectangle>());
                 for (int i = 0; i < tileCollider.Width; i++)
                 {
                     var bounds = new Rectangle(colliderPos.X + i, colliderPos.Y + j, _level.TileSize, _level.TileSize);
-                    collisionTiles[j].Add(new GameObject(bounds, ObjectType.Empty));
+                    collisionTiles[j].Add(bounds);
                 }
             }
 
             return collisionTiles;
         }
 
-        private static void UpdatePlayerCollisionTiles(Player player)
-        {
-            PlayerCollisions = GetCollisionTiles(player);
-        }
+        private static void UpdatePlayerCollisionTiles(Player player) => PlayerCollisions = GetCollisionTiles(player);
 
-        private static bool InCollisionBounds(Rectangle rect)
-        {
-            return rect.Y >= 0 && rect.Y < _collisionMap.GetLength(0) && rect.X >= 0 && rect.X < _collisionMap.GetLength(1);
-        }
+        private static bool InCollisionBounds(Rectangle rect) 
+            => rect.Y >= 0 && rect.Y < _collisionMap.GetLength(0) && rect.X >= 0 && rect.X < _collisionMap.GetLength(1);
 
-        public static GameObject GetTileInGlobal(GameObject tile)
-        {
-            var bounds = new Rectangle(
-                    tile.Bounds.X * tile.Bounds.Width, 
-                    tile.Bounds.Y * tile.Bounds.Height, 
-                    tile.Bounds.Width, 
-                    tile.Bounds.Height
-                );
-            return new GameObject(bounds, tile.Type);
-        }
+        public static Rectangle GetTileInGlobal(Rectangle tile) 
+            => new(tile.X * tile.Width, tile.Y * tile.Height, tile.Width, tile.Height);
     }
 }

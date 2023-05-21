@@ -13,4 +13,21 @@ namespace Pxl
     {
         public void Draw(SpriteBatch spriteBatch, Vector2 position);
     }
+
+    public static class SpriteFactory
+    {
+        public static ISprite CreateSprite(IGameObject gameObject, Dictionary<string, Texture2D> textures)
+        {
+            return gameObject switch
+            {
+                (Ground) => new GroundSprite(gameObject.Bounds, textures["ground"], textures["mountain_fill"]),
+
+                (Platform) => new PlatformSprite(gameObject.Bounds, textures["ground"]),
+
+                (Spikes) => new SpikesSprite(gameObject.Bounds, textures["spikes"]),
+
+                _ => throw new NotImplementedException("Error when getting sprite"),
+            };
+        }
+    }
 }

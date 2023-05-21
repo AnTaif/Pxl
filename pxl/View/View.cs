@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.IO;
 
 namespace Pxl
@@ -14,6 +15,7 @@ namespace Pxl
         private Background background;
 
         private Dictionary<string, Texture2D> textures;
+        private Dictionary<IGameObject, ISprite> sprites;
         private SpriteFont bitmapMC;
 
         // Sprites
@@ -43,6 +45,8 @@ namespace Pxl
                 {"spikes", content.Load<Texture2D>("spikes") },
             };
 
+            sprites = new Dictionary<IGameObject, ISprite>();
+
             background.LoadContent(content);
         }
 
@@ -53,8 +57,12 @@ namespace Pxl
 
             background.Draw(gameTime);
 
-            foreach (var tile in currentLevel.GameObjects)
-                DrawTile(tile);
+            foreach (var gameObject in currentLevel.GameObjects)
+            {
+                var sprite = GetOrCreateSprite(gameObject);
+
+                sprite.Draw(_spriteBatch, gameObject.Position);
+            }
 
             PlayerSprite.Update(gameTime);
             PlayerSprite.Draw(_spriteBatch, model.Player.Position);
@@ -65,70 +73,13 @@ namespace Pxl
             _spriteBatch.End();
         }
 
-        private void DrawGroundRectangle(Rectangle parentRect, Texture2D groundTexture, Texture2D fillingTexture)
+        public ISprite GetOrCreateSprite(IGameObject gameObject)
         {
-            var tileSize = groundTexture.Width;
-            var tileXCount = parentRect.Width / tileSize;
-            var tileYCount = parentRect.Height / tileSize;
+            if (sprites.ContainsKey(gameObject))
+                return sprites[gameObject];
 
-            var ground = true;
-            for (int j = 0; j < tileYCount; j++)
-            {
-                for (int i = 0; i < tileXCount; i++)
-                {
-                    var position = new Rectangle(parentRect.X + i * tileSize, parentRect.Y + j * tileSize, tileSize, tileSize);
-                    if (ground)
-                    {
-                        _spriteBatch.Draw(groundTexture, position, Color.White);
-                    } else
-                        _spriteBatch.Draw(fillingTexture, position, Color.White);
-                }
-                ground = false;
-            }
-        }
-
-        public void DrawTile(GameObject tile)
-        {
-            switch (tile.Type)
-            {
-                case ObjectType.Ground:
-                    DrawGroundRectangle(tile.Bounds, textures["ground"], textures["mountain_fill"]);
-                    break;
-                case ObjectType.Platform:
-                    DrawPlatformRectangle(tile.Bounds, textures["ground"]);
-                    break;
-                case ObjectType.Spikes:
-                    DrawSpikesRectangle(tile.Bounds, textures["spikes"]);
-                    break;
-            }
-        }
-
-        private void DrawPlatformRectangle(Rectangle bounds, Texture2D texture)
-        {
-            var tileSize = texture.Width;
-            var tileXCount = bounds.Width / tileSize;
-            var tileYCount = bounds.Height / tileSize;
-
-            for (int j = 0; j < tileYCount; j++)
-            {
-                for (int i = 0; i < tileXCount; i++)
-                {
-                    var position = new Rectangle(bounds.X + i * tileSize, bounds.Y + j * tileSize, tileSize, tileSize);
-                    _spriteBatch.Draw(texture, position, Color.White);
-                }
-            }
-        }
-
-        private void DrawSpikesRectangle(Rectangle bounds, Texture2D spikesTexture)
-        {
-            var tileSize = spikesTexture.Width;
-            var tileXCount = bounds.Width / tileSize;
-
-            for (int i = 0; i < tileXCount; i++)
-            {
-                var position = new Rectangle(bounds.X + i * tileSize, bounds.Y, tileSize, tileSize);
-                _spriteBatch.Draw(spikesTexture, position, Color.White);
-            }
+            sprites[gameObject] = SpriteFactory.CreateSprite(gameObject, textures);
+            return sprites[gameObject];
         }
 
         private void ShowDebug(SpriteBatch spriteBatch, GameModel model)
@@ -153,7 +104,7 @@ namespace Pxl
             _spriteBatch.Draw(textures["player_collision"], model.Player.Collider, Color.White); // Collider
             foreach (var collisionRow in CollisionManager.PlayerCollisions)
                 foreach(var collision in collisionRow)
-                    _spriteBatch.Draw(textures["collision"], CollisionManager.GetTileInGlobal(collision).Bounds, Color.White); // CollisionTile
+                    _spriteBatch.Draw(textures["collision"], CollisionManager.GetTileInGlobal(collision), Color.White); // CollisionTile
         }
 
         public static List<Texture2D> LoadContentFolder(ContentManager content, string folder)

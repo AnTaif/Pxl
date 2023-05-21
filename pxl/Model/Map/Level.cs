@@ -12,10 +12,10 @@ namespace Pxl
 
         public Vector2 SpawnPos { get; private set; }
         public List<Entity> Entities { get; private set; }
-        public List<GameObject> GameObjects { get; private set; }
+        public List<IGameObject> GameObjects { get; private set; }
         public CollisionType[,] CollisionMap { get; private set; }
 
-        public Level(int currentStage, int currentId, (int Width, int Height) size, List<GameObject> gameObjects, Vector2 spawn)
+        public Level(int currentStage, int currentId, (int Width, int Height) size, List<IGameObject> gameObjects, Vector2 spawn)
         {
             Stage = currentStage;
             Id = currentId;
@@ -26,7 +26,7 @@ namespace Pxl
             CollisionMap = ConvertToCollisionMap(GameObjects);
         }
 
-        public CollisionType[,] ConvertToCollisionMap(List<GameObject> gameObjects)
+        public CollisionType[,] ConvertToCollisionMap(List<IGameObject> gameObjects)
         {
             var tileHeight = Size.Height / TileSize;
             var tileWidth = Size.Width / TileSize;
@@ -43,8 +43,8 @@ namespace Pxl
                 for (int i = startY; i < endY; i++)
                     for (int j = startX; j < endX; j++)
                     {
-                        if (i >= 0 && i < tileHeight && j >= 0 && j < tileWidth && gameObject.Type != ObjectType.Empty)
-                            collisionMap[i, j] = gameObject.Type == ObjectType.Spikes ? CollisionType.Spikes : CollisionType.Solid;
+                        if (i >= 0 && i < tileHeight && j >= 0 && j < tileWidth && gameObject.CollisionType != CollisionType.None)
+                            collisionMap[i, j] = gameObject.CollisionType;
                     } 
             }
 
