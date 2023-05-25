@@ -77,11 +77,11 @@ namespace Pxl
             {
                 cloud.Draw(_spriteBatch);
                 cloud.Update(gameTime);
-                if (cloud.Position.X + cloud.Size.X < 0)
+                if (cloud.Position.X + cloud.Size.X <= 0)
                     if (cloud.Texture == cloudLonely)
                         cloud.ReCreate(new Vector2(Size.Width, random.Next(10, 160)), new Point(cloudLonely.Width, cloudLonely.Height), (float)random.NextDouble() + 0.5f);
                     else
-                        cloud.ReCreate(new Vector2(Size.Width, 0));
+                        cloud.ReCreate(new Vector2(cloud.Size.X + (cloud.Position.X + cloud.Size.X), 0));
             }
         }
     }

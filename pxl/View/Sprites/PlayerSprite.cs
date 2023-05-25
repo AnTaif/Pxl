@@ -8,6 +8,7 @@ namespace Pxl
 {
     public class PlayerSprite : ISprite
     {
+        private readonly string rootName;
         public Texture2D Texture { get; private set; }
 
         // Animations
@@ -19,24 +20,25 @@ namespace Pxl
 
         private Texture2D _currentTexture;
 
-        public PlayerSprite()
+        public PlayerSprite(string rootName)
         {
+            this.rootName = rootName;
             _animationManager = new AnimationManager();
         }
 
         public void LoadContent(ContentManager content)
         {
-            Texture = content.Load<Texture2D>("Owlet/owlet");
+            Texture = content.Load<Texture2D>($"{rootName}/{rootName.ToLower()}");
             _currentTexture = Texture;
 
             _animationManager.PlayAnimation(new Animation(new List<Texture2D>() { Texture }, 0.2f, "default"), "default");
 
-            var rightIdleFrames = GameView.LoadContentFolder(content, "Owlet/idle/right");
-            var leftIdleFrames = GameView.LoadContentFolder(content, "Owlet/idle/left");
-            var rightWalkFrames = GameView.LoadContentFolder(content, "Owlet/walk/right");
-            var leftWalkFrames = GameView.LoadContentFolder(content, "Owlet/walk/left");
-            var rightJumpFrames = GameView.LoadContentFolder(content, "Owlet/jump/right");
-            var leftJumpFrames = GameView.LoadContentFolder(content, "Owlet/jump/left");
+            var rightIdleFrames = GameView.LoadContentFolder(content, $"{rootName}/idle/right");
+            var leftIdleFrames = GameView.LoadContentFolder(content, $"{rootName}/idle/left");
+            var rightWalkFrames = GameView.LoadContentFolder(content, $"{rootName}/walk/right");
+            var leftWalkFrames = GameView.LoadContentFolder(content, $"{rootName}/walk/left");
+            var rightJumpFrames = GameView.LoadContentFolder(content, $"{rootName}/jump/right");
+            var leftJumpFrames = GameView.LoadContentFolder(content, $"{rootName}/jump/left");
 
             _animations = new Dictionary<string, Animation>()
             {

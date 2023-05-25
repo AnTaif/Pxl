@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Pxl
 {
-    public class Player
+    public class Player : IEntity
     {
         private const float Gravity = 23;
         private const float MaxFallSpeed = 400;
@@ -19,24 +19,30 @@ namespace Pxl
         private const float Speed = 15f;
         private const float JumpSpeed = -500;
 
-        private Vector2 velocity = Vector2.Zero;
-        public readonly (int Width, int Height) Size = (28, 35);
-
-        public int DeathCount { get; private set; }
-
-        public Vector2 SpawnPos { get; set; }
-        public Vector2 Velocity { get { return velocity; } }
         public bool OnGround { get; private set; }
         public bool IsAlive { get; private set; }
-        public Vector2 Position { get; set; }
-        public Rectangle Collider { get; set; }
-        public List<List<IGameObject>> CollisionTiles { get; private set; }
+        public int DeathCount { get; private set; }
+        public Vector2 SpawnPosition { get; private set; }
 
-        public Player(Vector2 startPosition)
+
+        private Vector2 velocity = Vector2.Zero;
+        public Vector2 Velocity { get { return velocity; } }
+
+
+        //public readonly (int Width, int Height) Size = (28, 35);
+        //public Vector2 Position { get; set; }
+
+        private RectangleF bounds;
+        public RectangleF Bounds { get { return bounds; } }
+
+        public Rectangle Collider { get; private set; }
+        public List<List<Rectangle>> Collisions { get; private set; } // CollisionTiles
+
+        public Player(RectangleF bounds)
         {
-            Position = startPosition;
-            Collider = new Rectangle((int)Position.X+4, (int)Position.Y, Size.Width-4, Size.Height);
-            CollisionTiles = new List<List<IGameObject>>();
+            this.bounds = bounds;
+            Collider = new Rectangle((int)bounds.X+4, (int)bounds.Y, (int)bounds.Width-4, (int)bounds.Height);
+            Collisions = new List<List<Rectangle>>();
             DeathCount = 0;
         }
 
@@ -51,7 +57,7 @@ namespace Pxl
 
         private void MovePlayer(GameTime gameTime)
         {
-            Position += velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            bounds.Position += velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
             UpdateCollider(gameTime);
         }
 
@@ -66,7 +72,7 @@ namespace Pxl
 
         public void ApplyHorizontalMove(Vector2 inputDirection)
         {
-            if (inputDirection == Vector2.Zero || (Position.X < 0 && inputDirection.X < 0))
+            if (inputDirection == Vector2.Zero || (bounds.X < 0 && inputDirection.X < 0))
                 velocity.X = 0;
 
             else if (Math.Sign(inputDirection.X) == Math.Sign(velocity.X))
@@ -74,14 +80,14 @@ namespace Pxl
                 if (Math.Abs(velocity.X) < MaxSpeed)
                 {
                     velocity.X += inputDirection.X * Speed;
-                    if (Math.Abs(velocity.X) > MaxSpeed)
+                    if (Math.Abs(velocity.X) > MaxSpeed) // /TODO: Удалить??????
                     {
                         velocity.X = Math.Sign(velocity.X) * MaxSpeed;
                     }
                 }
             }
             else // If the player is trying to move in the opposite direction, change direction immediately
-                velocity.X = inputDirection.X * Speed;
+                velocity.X = inputDirection.X * Speed; //- velocity.X;
         }
 
         public void ApplyGravity()
@@ -93,9 +99,9 @@ namespace Pxl
         private void UpdateCollider(GameTime gameTime)
         {
             Collider = new Rectangle(
-                (int)Position.X + (int)(velocity.X * (float)gameTime.ElapsedGameTime.TotalSeconds) + Size.Width/2 - (Size.Width - 4)/2,
-                (int)Position.Y + (int)(velocity.Y * (float)gameTime.ElapsedGameTime.TotalSeconds),
-                Size.Width-4, Size.Height);
+                (int)bounds.X,
+                (int)bounds.Y,
+                (int)bounds.Width, (int)bounds.Height);
         }
         
         public void HandleCollisionsWithLevel()
@@ -106,9 +112,7 @@ namespace Pxl
             {
                 if (collision.Type == CollisionType.Spikes)
                 {
-                    //IsAlive = false;
-                    DeathCount++;
-                    Position = SpawnPos;
+                    Deadge();
                     return;
                 }
 
@@ -136,7 +140,7 @@ namespace Pxl
                             break;
                         }
 
-                        Position = new Vector2(Position.X, collision.InteractionTile.Y - Size.Height + 1);
+                        bounds.Position = new Vector2(bounds.X, collision.InteractionTile.Y - bounds.Height + 1);
                         velocity.Y = 0;
                         OnGround = true;
                         break;
@@ -144,6 +148,18 @@ namespace Pxl
             }
         }
 
-        public void UpdatePosition(Vector2 newPosition) => Position = newPosition;
+        public void UpdateCollisions() => Collisions = CollisionManager.GetCollisionTiles(this);
+
+        private void Deadge()
+        {
+            IsAlive = false;
+            DeathCount++;
+            bounds.Position = SpawnPosition;
+        }
+
+        public void SetSpawn(Vector2 position) => SpawnPosition = position;
+
+        public void UpdatePosition(Vector2 newPosition) => bounds.Position = newPosition;
+
     }
 }

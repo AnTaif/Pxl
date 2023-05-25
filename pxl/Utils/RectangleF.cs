@@ -22,6 +22,14 @@ namespace Pxl
             Height = height;
         }
 
+        public RectangleF(Vector2 position, Vector2 size)
+        {
+            X = position.X;
+            Y = position.Y;
+            Width = size.X;
+            Height = size.Y;
+        }
+
         public float Top
         {
             get { return Y; }
@@ -42,11 +50,13 @@ namespace Pxl
         public Vector2 Position
         {
             get { return new Vector2(X, Y); }
+            set { X = value.X; Y = value.Y; }
         }
 
         public Vector2 Size
         {
             get { return new Vector2(Width, Height); }
+            set { Width = value.X; Height = value.Y; }
         }
 
         public bool Intersects(RectangleF value)
@@ -56,5 +66,7 @@ namespace Pxl
 
             return false;
         }
+
+        public Rectangle ConvertToRectangle() => new((int)X, (int)Y, (int)Width, (int)Height);
     }
 }

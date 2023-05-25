@@ -1,0 +1,8 @@
+{
+        "Tiles": {
+                "0":"ground",
+                "1":"mountain_fill",
+                "2":"spikes"
+        },
+        "TileSize":16 
+}

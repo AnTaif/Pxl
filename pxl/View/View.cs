@@ -15,15 +15,15 @@ namespace Pxl
         private Background background;
 
         private Dictionary<string, Texture2D> textures;
-        private Dictionary<IGameObject, ISprite> sprites;
         private SpriteFont bitmapMC;
 
-        // Sprites
+        private Dictionary<IGameObject, ISprite> levelSprites;
+        private Dictionary<IEntity, ISprite> entitySprites;
         public PlayerSprite PlayerSprite { get; }
 
         public GameView()
         {
-            PlayerSprite = new PlayerSprite();
+            PlayerSprite = new PlayerSprite("Owlet");
         }
 
         public void LoadContent(SpriteBatch spriteBatch, ContentManager content)
@@ -45,7 +45,8 @@ namespace Pxl
                 {"spikes", content.Load<Texture2D>("spikes") },
             };
 
-            sprites = new Dictionary<IGameObject, ISprite>();
+            levelSprites = new Dictionary<IGameObject, ISprite>();
+            entitySprites = new Dictionary<IEntity, ISprite>();
 
             background.LoadContent(content);
         }
@@ -53,7 +54,7 @@ namespace Pxl
         public void Draw(GameTime gameTime, GameModel model)
         {
             _spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, Matrix.CreateScale(1f));
-            var currentLevel = model.Map.CurrentLevel;
+            var currentLevel = LevelManager.CurrentLevel;
 
             background.Draw(gameTime);
 
@@ -65,7 +66,7 @@ namespace Pxl
             }
 
             PlayerSprite.Update(gameTime);
-            PlayerSprite.Draw(_spriteBatch, model.Player.Position);
+            PlayerSprite.Draw(_spriteBatch, model.Player.Bounds.Position);
 
             if (isDebugShowing)
                 ShowDebug(_spriteBatch, model);
@@ -75,17 +76,17 @@ namespace Pxl
 
         public ISprite GetOrCreateSprite(IGameObject gameObject)
         {
-            if (sprites.ContainsKey(gameObject))
-                return sprites[gameObject];
+            if (levelSprites.ContainsKey(gameObject))
+                return levelSprites[gameObject];
 
-            sprites[gameObject] = SpriteFactory.CreateSprite(gameObject, textures);
-            return sprites[gameObject];
+            levelSprites[gameObject] = SpriteFactory.CreateSprite(gameObject, textures);
+            return levelSprites[gameObject];
         }
 
         private void ShowDebug(SpriteBatch spriteBatch, GameModel model)
         {
             spriteBatch.DrawString(bitmapMC, 
-                model.Player.Position.ToString(), new Vector2(0, 0), Color.White);
+                model.Player.Bounds.Position.ToString(), new Vector2(0, 0), Color.White);
 
             spriteBatch.DrawString(bitmapMC, 
                 "On ground: " + model.Player.OnGround.ToString(), new Vector2(0, 20), Color.White);
@@ -94,15 +95,15 @@ namespace Pxl
                 "Death count: " + model.Player.DeathCount.ToString(), new Vector2(0, 40), Color.White);
 
             spriteBatch.DrawString(bitmapMC, 
-                $"Stage: {model.Map.CurrentLevel.Stage} Level: {model.Map.CurrentLevel.Id}", new Vector2(0, 60), Color.White);
+                $"Stage: {LevelManager.CurrentLevel.Stage} Level: {LevelManager.CurrentLevel.Id}", new Vector2(0, 60), Color.White);
             
-            DrawCollisions(_spriteBatch, model);
+            DrawCollisions(_spriteBatch, model.Player);
         }
 
-        public void DrawCollisions(SpriteBatch spriteBatch, GameModel model)
+        public void DrawCollisions(SpriteBatch spriteBatch, IEntity entity)
         {
-            _spriteBatch.Draw(textures["player_collision"], model.Player.Collider, Color.White); // Collider
-            foreach (var collisionRow in CollisionManager.PlayerCollisions)
+            _spriteBatch.Draw(textures["player_collision"], entity.Collider, Color.White); // Collider
+            foreach (var collisionRow in entity.Collisions)
                 foreach(var collision in collisionRow)
                     _spriteBatch.Draw(textures["collision"], CollisionManager.GetTileInGlobal(collision), Color.White); // CollisionTile
         }

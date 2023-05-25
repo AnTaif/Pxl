@@ -7,8 +7,14 @@ using System.Threading.Tasks;
 
 namespace Pxl
 {
-    public interface Entity
+    public interface IEntity
     {
         public Rectangle Collider { get; }
+        public List<List<Rectangle>> Collisions { get; }
+
+        public bool IsAlive { get; }
+        public Vector2 Velocity { get; }
+
+        public void UpdateCollisions();
     }
 }

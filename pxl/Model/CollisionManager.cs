@@ -32,7 +32,7 @@ namespace Pxl
     {
         private static Level _level;
         private static CollisionType[,] _collisionMap;
-        private static List<Entity> _entities;
+        private static List<IEntity> _entities;
 
         public static List<List<Rectangle>> PlayerCollisions { get; private set; }
 
@@ -41,32 +41,32 @@ namespace Pxl
             _level = level;
             _collisionMap = _level.CollisionMap;
             _entities = _level.Entities;
-
         }
 
-        public static void AddEntity(Entity entity) => _entities.Add(entity);
+        public static void AddEntity(IEntity entity) => _entities.Add(entity);
 
-        public static void RemoveEntity(Entity entity) => _entities.Remove(entity);
+        public static void RemoveEntity(IEntity entity) => _entities.Remove(entity);
 
-        public static List<CollisionInfo> GetCollisionsWithLevel(Player player)
+        public static List<CollisionInfo> GetCollisionsWithLevel(IEntity entity)
         {
             var collisionsWithLevel = new List<CollisionInfo>();
 
-            var direction = player.Velocity;
-            UpdatePlayerCollisionTiles(player);
+            var direction = entity.Velocity;
+
+            entity.UpdateCollisions();
 
             direction.Normalize();
 
             if (direction.X != 0)
             {
-                var collisionInfo = CheckHorizontalCollision(direction, PlayerCollisions);
+                var collisionInfo = CheckHorizontalCollision(direction, entity.Collisions);
                 if (collisionInfo.Type != CollisionType.None)
                     collisionsWithLevel.Add(collisionInfo);
             }
    
             if (direction.Y != 0)
             {
-                var collisionInfo = CheckVerticalCollision(direction, PlayerCollisions);
+                var collisionInfo = CheckVerticalCollision(direction, entity.Collisions);
                 collisionsWithLevel.Add(collisionInfo);
             }
 
@@ -129,10 +129,10 @@ namespace Pxl
             return new CollisionInfo(CollisionType.None, collisionDirection);
         }
 
-        private static List<List<Rectangle>> GetCollisionTiles(Player player)
+        public static List<List<Rectangle>> GetCollisionTiles(IEntity entity)
         {
             var collisionTiles = new List<List<Rectangle>>();
-            var collider = player.Collider;
+            var collider = entity.Collider;
 
             var tileSize = _level.TileSize;
             var colliderPos = new Point(collider.X / tileSize, collider.Y / tileSize);
@@ -156,8 +156,6 @@ namespace Pxl
 
             return collisionTiles;
         }
-
-        private static void UpdatePlayerCollisionTiles(Player player) => PlayerCollisions = GetCollisionTiles(player);
 
         private static bool InCollisionBounds(Rectangle rect) 
             => rect.Y >= 0 && rect.Y < _collisionMap.GetLength(0) && rect.X >= 0 && rect.X < _collisionMap.GetLength(1);

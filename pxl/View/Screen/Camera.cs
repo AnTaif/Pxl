@@ -23,9 +23,9 @@ namespace Pxl
         {
             var position = Matrix.CreateTranslation(
                 followType == FollowType.AxisX || followType == FollowType.Target ?
-                    -target.Position.X - target.Size.Width / 2 : -1,
+                    -target.Bounds.X - target.Bounds.Width / 2 : -1,
                 followType == FollowType.AxisY || followType == FollowType.Target ?
-                    -target.Position.Y - target.Size.Height / 2 : - 1,
+                    -target.Bounds.Y - target.Bounds.Height / 2 : - 1,
                 0);
 
             var offset = Matrix.CreateTranslation(

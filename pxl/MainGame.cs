@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System.Reflection;
 
 namespace Pxl
 {
@@ -9,7 +8,8 @@ namespace Pxl
     {
         public static readonly (int Width, int Height) RenderSize = (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width,
                 GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height);
-        public static readonly (int Width, int Height) WorkingSize = (960, 540);
+        public static readonly (int Width, int Height) WorkingSize = (960, 540); //60, 34 in tiles
+        public static readonly int TileSize = 16;
 
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;

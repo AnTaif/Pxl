@@ -8,7 +8,6 @@ namespace Pxl
     public class GameModel
     {
         public readonly (int Width, int Height) Screen;
-        public readonly LevelManager Map;
         
         public Player Player { get; private set; }
         public GameState State { get; private set; }
@@ -17,22 +16,23 @@ namespace Pxl
         {
             Screen = screenSize;
             State = GameState.Play;
-            Map = new LevelManager();
-            Player = new Player(Map.CurrentLevel.SpawnPos);
+            LevelManager.LoadMapFromFile("TestMap");
+            LevelManager.LoadLevels();
+            Player = new Player(new RectangleF(LevelManager.CurrentLevel.SpawnPoint, new Vector2(28, 35)));
 
-            CollisionManager.SetLevel(Map.CurrentLevel);
+            CollisionManager.SetLevel(LevelManager.CurrentLevel);
         }
 
         public void Update(GameTime gameTime)
         {
             Player.Update(gameTime);
 
-            if (Player.Position.X >= Map.CurrentLevel.Size.Width)
+            if (Player.Bounds.X >= LevelManager.CurrentLevel.Size.Width)
             {
-                Map.SetNextLevel();
-                CollisionManager.SetLevel(Map.CurrentLevel);
-                Player.UpdatePosition(new Vector2(0, Player.Position.Y - 4));
-                Player.SpawnPos = Map.CurrentLevel.SpawnPos;
+                LevelManager.SetNextLevel();
+                CollisionManager.SetLevel(LevelManager.CurrentLevel);
+                Player.UpdatePosition(new Vector2(0, Player.Bounds.Y - 4));
+                Player.SetSpawn(LevelManager.CurrentLevel.SpawnPoint);
             }
         }
     }

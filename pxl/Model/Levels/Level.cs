@@ -5,23 +5,28 @@ namespace Pxl
 {
     public class Level
     {
-        public readonly int TileSize = 16;
+        public readonly int TileSize = MainGame.TileSize;
         public readonly int Id;
         public readonly int Stage;
         public readonly (int Width, int Height) Size;
 
-        public Vector2 SpawnPos { get; private set; }
-        public List<Entity> Entities { get; private set; }
+        public Vector2 SpawnPoint { get; private set; }
+        public List<IEntity> Entities { get; private set; }
         public List<IGameObject> GameObjects { get; private set; }
         public CollisionType[,] CollisionMap { get; private set; }
 
-        public Level(int currentStage, int currentId, (int Width, int Height) size, List<IGameObject> gameObjects, Vector2 spawn)
-        {
+        public Level(
+            int currentStage, int currentId,
+            (int Width, int Height) size, 
+            List<IGameObject> gameObjects, List<IEntity> entities,
+            Vector2? spawnPoint = null
+        ) {
             Stage = currentStage;
             Id = currentId;
             Size = size;
 
-            SpawnPos = spawn;
+            SpawnPoint = spawnPoint ?? Vector2.Zero;
+            Entities = entities;
             GameObjects = gameObjects;
             CollisionMap = ConvertToCollisionMap(GameObjects);
         }
@@ -49,11 +54,6 @@ namespace Pxl
             }
 
             return collisionMap;
-        }
-
-        public bool InCollisionBounds(Rectangle rect)
-        {
-            return rect.Y >= 0 && rect.Y < CollisionMap.GetLength(0) && rect.X >= 0 && rect.X < CollisionMap.GetLength(1);
         }
     }
 }
