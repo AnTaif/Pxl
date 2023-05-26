@@ -8,8 +8,7 @@ namespace Pxl
     {
         public static readonly (int Width, int Height) RenderSize = (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width,
                 GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height);
-        public static readonly (int Width, int Height) WorkingSize = (960, 540); //60, 34 in tiles
-        public static readonly int TileSize = 16;
+        public static readonly (int Width, int Height) WorkingSize = (960, 540); //60, 34 in 16px tiles
 
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
@@ -23,8 +22,8 @@ namespace Pxl
         {
             _graphics = new GraphicsDeviceManager(this)
             {
-                PreferredBackBufferWidth = 1650, //RenderSize.Width, //1440
-                PreferredBackBufferHeight = 930, //RenderSize.Height, //810
+                PreferredBackBufferWidth = 1650, //RenderSize.Width,
+                PreferredBackBufferHeight = 930, //RenderSize.Height,
                 //IsFullScreen = true,
                 SynchronizeWithVerticalRetrace = true
             };

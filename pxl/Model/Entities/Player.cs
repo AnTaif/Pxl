@@ -28,10 +28,6 @@ namespace Pxl
         private Vector2 velocity = Vector2.Zero;
         public Vector2 Velocity { get { return velocity; } }
 
-
-        //public readonly (int Width, int Height) Size = (28, 35);
-        //public Vector2 Position { get; set; }
-
         private RectangleF bounds;
         public RectangleF Bounds { get { return bounds; } }
 
@@ -44,6 +40,8 @@ namespace Pxl
             Collider = new Rectangle((int)bounds.X+4, (int)bounds.Y, (int)bounds.Width-4, (int)bounds.Height);
             Collisions = new List<List<Rectangle>>();
             DeathCount = 0;
+;
+            SetSpawn(LevelManager.CurrentLevel.SpawnPoint);
         }
 
         public void Update(GameTime gameTime)

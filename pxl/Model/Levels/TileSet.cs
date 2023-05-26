@@ -2,19 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Pxl
 {
     public class TileSet
     {
-        public Dictionary<int, Tile> Tiles { get; set; }
-        public int TileSize { get; set; }
-    }
+        public Dictionary<int, Tile> Tiles { get; private set; }
+        public int TileSize { get; private set; }
 
-    public class Tile
-    {
-        public string Name { get; set; }
-        public CollisionType CollisionType { get; set; }
+        [JsonConstructor]
+        public TileSet(Dictionary<int, Tile> tiles, int tileSize)
+        {
+            Tiles = tiles;
+            TileSize = tileSize;
+        }
     }
 }

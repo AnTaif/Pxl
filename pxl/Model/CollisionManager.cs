@@ -6,7 +6,7 @@ using System.Linq;
 namespace Pxl
 {
     public enum CollisionType { None, Solid, Spikes, Enemy}
-    public enum CollisionDirection { Left, Top, Right, Bottom}
+    public enum CollisionDirection { All, Left, Top, Right, Bottom}
 
     public class CollisionInfo
     {
@@ -82,54 +82,76 @@ namespace Pxl
             else
                 collisionDirection = CollisionDirection.Left;
 
+            var collisionType = CollisionType.None;
+            var tileInGlobal = Rectangle.Empty;
+
             for (int i = 1; i < collisionTiles.Count - 1; i++)
             {
                 var tile = direction.X > 0 ? collisionTiles[i].Last() : collisionTiles[i].First();
+                var currentCollision = tileMap[tile.Y, tile.X];
 
                 if (!InCollisionBounds(tile))
                     continue;
 
-                if (tileMap[tile.Y, tile.X].CollisionType != CollisionType.None)
+                if (currentCollision.CollisionType != CollisionType.None)
                 {
-                    return new CollisionInfo(CollisionType.Solid, collisionDirection, GetTileInGlobal(tile));
+                    if (TargetDirectionSameWithCollision(currentCollision.TargetDirection, collisionDirection))
+                    {
+                        tileInGlobal = GetTileInGlobal(tile);
+                        if (currentCollision.CollisionType == CollisionType.Solid)
+                        {
+                            collisionType = CollisionType.Solid;
+                            break;
+                        }
+                        else
+                            collisionType = currentCollision.CollisionType;
+                    }
+                    else
+                        collisionType = CollisionType.Solid;
                 }
             }
-            return new CollisionInfo(CollisionType.None, collisionDirection);
+
+            return new CollisionInfo(collisionType, collisionDirection, tileInGlobal);
         }
 
         private static CollisionInfo CheckVerticalCollision(Vector2 direction, List<List<Rectangle>> collisionTiles)
         {
-            CollisionDirection collisionDirection;
-            List<Rectangle> collisionsToCheck;
+            var collisionDirection = (direction.Y >= 0) ? CollisionDirection.Bottom : CollisionDirection.Top;
+            var collisionsToCheck = (direction.Y >= 0) ? collisionTiles[collisionTiles.Count - 1] : collisionTiles[0];
 
-            if (direction.Y >= 0)
-            {
-                collisionDirection = CollisionDirection.Bottom;
-                collisionsToCheck = collisionTiles[collisionTiles.Count - 1];
-            }
-            else
-            {
-                collisionDirection = CollisionDirection.Top;
-                collisionsToCheck = collisionTiles[0];
-            }
+            var collisionType = CollisionType.None;
+            var tileInGlobal = Rectangle.Empty;
 
-            foreach(var tile in collisionsToCheck)
+            foreach (var tile in collisionsToCheck)
             {
                 if (!InCollisionBounds(tile))
                     continue;
 
-                var currentCollision = tileMap[tile.Y, tile.X].CollisionType;
-                var nextCollision = tileMap[tile.Y + ((direction.Y >= 0) ? -1 : 1), tile.X].CollisionType;
+                var currentCollision = tileMap[tile.Y, tile.X];
+                var nextCollision = tileMap[tile.Y + ((direction.Y >= 0) ? -1 : 1), tile.X];
 
-                if (currentCollision != CollisionType.None && nextCollision == CollisionType.None)
+                if (currentCollision.CollisionType != CollisionType.None && nextCollision.CollisionType == CollisionType.None)
                 {
-                    // TODO: Check all tiles to avoid situations, when you mostly staying in solid blocks,
-                    // but bottom collision handle spikes
-                    return new CollisionInfo(currentCollision, collisionDirection, GetTileInGlobal(tile));
+                    tileInGlobal = GetTileInGlobal(tile);
+                    if (TargetDirectionSameWithCollision(currentCollision.TargetDirection, collisionDirection))
+                    {
+                        if (currentCollision.CollisionType == CollisionType.Solid)
+                        {
+                            collisionType = CollisionType.Solid;
+                            break;
+                        }
+                        else
+                            collisionType = currentCollision.CollisionType;
+                    }
+                    else
+                        collisionType = CollisionType.Solid;
                 }
             }
-            return new CollisionInfo(CollisionType.None, collisionDirection);
+            return new CollisionInfo(collisionType, collisionDirection, tileInGlobal);
         }
+
+        private static bool TargetDirectionSameWithCollision(CollisionDirection target, CollisionDirection collision)
+            => target == CollisionDirection.All || target == collision;
 
         public static List<List<Rectangle>> GetCollisionTiles(IEntity entity)
         {

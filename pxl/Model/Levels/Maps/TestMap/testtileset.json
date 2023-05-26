@@ -2,19 +2,28 @@
         "Tiles": {
                 "0":{
                         "Name": "",
-                        "CollisionType": 0
+                        "CollisionTypeName": "None",
+                        "TargetDirection": "All"
                 },
                 "1":{
                         "Name": "ground",
-                        "CollisionType": 1
+                        "CollisionTypeName": "Solid",
+                        "TargetDirection": "All"
                 },
                 "2":{
                         "Name": "mountain_fill",
-                        "CollisionType": 1
+                        "CollisionTypeName": "Solid",
+                        "TargetDirection": "All"
                 },
                 "3":{
                         "Name": "spikes",
-                        "CollisionType": 2
+                        "CollisionTypeName": "Spikes",
+                        "TargetDirection": "Bottom"
+                },
+                "4":{
+                        "Name": "spikes",
+                        "CollisionTypeName": "Spikes",
+                        "TargetDirection": "Right"
                 }
         },
         "TileSize":16 

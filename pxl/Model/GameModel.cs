@@ -18,7 +18,6 @@ namespace Pxl
             State = GameState.Play;
             LevelManager.LoadMapFromFile("TestMap");
             Player = new Player(new RectangleF(LevelManager.CurrentLevel.SpawnPoint.ToVector2(), new Vector2(28, 35)));
-
             CollisionManager.SetLevel(LevelManager.CurrentLevel);
         }
 
