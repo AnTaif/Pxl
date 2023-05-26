@@ -57,13 +57,30 @@ namespace Pxl
             var currentLevel = LevelManager.CurrentLevel;
 
             background.Draw(gameTime);
+            var tileSize = LevelManager.TileSet.TileSize;
 
-            foreach (var gameObject in currentLevel.GameObjects)
+            var tileMap = LevelManager.CurrentLevel.TileMap;
+            for (int i = 0; i < tileMap.GetLength(0); i++)
             {
-                var sprite = GetOrCreateSprite(gameObject);
+                for (int j = 0; j < tileMap.GetLength(1); j++)
+                {
+                    var tileName = tileMap[i, j].Name;
+                    if (tileName.Equals(""))
+                        continue;
 
-                sprite.Draw(_spriteBatch, gameObject.Position);
-            }
+                    var texture = textures[tileName];
+                    var position = new Vector2(j*tileSize, i*tileSize);
+
+                    _spriteBatch.Draw(texture, position, Color.White);
+                }
+            }            
+
+            //foreach (var gameObject in currentLevel.GameObjects)
+            //{
+            //    var sprite = GetOrCreateSprite(gameObject);
+
+            //    sprite.Draw(_spriteBatch, gameObject.Position);
+            //}
 
             PlayerSprite.Update(gameTime);
             PlayerSprite.Draw(_spriteBatch, model.Player.Bounds.Position);

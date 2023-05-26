@@ -1,56 +1,55 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Pxl
 {
     public class Level
     {
-        public readonly int TileSize = MainGame.TileSize;
-        public readonly int Id;
         public readonly int Stage;
-        public readonly (int Width, int Height) Size;
+        public readonly int Id;
+        public readonly Point Size;
 
-        public Vector2 SpawnPoint { get; private set; }
+        public int[,] StationaryMap { get; private set; }
+        public List<IGameObject> MovingObjects { get; private set; }
         public List<IEntity> Entities { get; private set; }
-        public List<IGameObject> GameObjects { get; private set; }
-        public CollisionType[,] CollisionMap { get; private set; }
+        public Point SpawnPoint { get; private set; }
 
+        public Tile[,] TileMap { get; private set; }
+
+        [JsonConstructor]
         public Level(
-            int currentStage, int currentId,
-            (int Width, int Height) size, 
-            List<IGameObject> gameObjects, List<IEntity> entities,
-            Vector2? spawnPoint = null
+            int stage, int id,
+            Point size, 
+            int[,] stationaryMap, 
+            List<IGameObject> movingObjects,
+            List<IEntity> entities,
+            Point spawnPoint
         ) {
-            Stage = currentStage;
-            Id = currentId;
+            Stage = stage;
+            Id = id;
             Size = size;
-
-            SpawnPoint = spawnPoint ?? Vector2.Zero;
+            StationaryMap = stationaryMap;
+            MovingObjects = movingObjects;
             Entities = entities;
-            GameObjects = gameObjects;
-            CollisionMap = ConvertToCollisionMap(GameObjects);
+            SpawnPoint = spawnPoint;
+
+            TileMap = ConvertToCollisionMap(StationaryMap);
         }
 
-        public CollisionType[,] ConvertToCollisionMap(List<IGameObject> gameObjects)
+        public Tile[,] ConvertToCollisionMap(int[,] stationaryMap)
         {
-            var tileHeight = Size.Height / TileSize;
-            var tileWidth = Size.Width / TileSize;
-            CollisionType[,] collisionMap = new CollisionType[tileHeight, tileWidth];
+            var height = stationaryMap.GetLength(0);
+            var width = stationaryMap.GetLength(1);
+            Tile[,] collisionMap = new Tile[height, width];
 
-            foreach (var gameObject in gameObjects)
+            for (int i = 0; i < height; i++)
             {
-                var rect = gameObject.Bounds;
-                int startX = rect.X / TileSize;
-                int startY = rect.Y / TileSize;
-                int endX = (rect.X + rect.Width) / TileSize;
-                int endY = (rect.Y + rect.Height) / TileSize;
-
-                for (int i = startY; i < endY; i++)
-                    for (int j = startX; j < endX; j++)
-                    {
-                        if (i >= 0 && i < tileHeight && j >= 0 && j < tileWidth && gameObject.CollisionType != CollisionType.None)
-                            collisionMap[i, j] = gameObject.CollisionType;
-                    } 
+                for (int j = 0; j < width; j++)
+                {
+                    var tileId = stationaryMap[i, j];
+                    collisionMap[i, j] = LevelManager.TileSet.Tiles[tileId];
+                }
             }
 
             return collisionMap;

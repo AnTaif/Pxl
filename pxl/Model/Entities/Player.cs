@@ -22,7 +22,7 @@ namespace Pxl
         public bool OnGround { get; private set; }
         public bool IsAlive { get; private set; }
         public int DeathCount { get; private set; }
-        public Vector2 SpawnPosition { get; private set; }
+        public Point SpawnPosition { get; private set; }
 
 
         private Vector2 velocity = Vector2.Zero;
@@ -154,10 +154,10 @@ namespace Pxl
         {
             IsAlive = false;
             DeathCount++;
-            bounds.Position = SpawnPosition;
+            bounds.Position = SpawnPosition.ToVector2();
         }
 
-        public void SetSpawn(Vector2 position) => SpawnPosition = position;
+        public void SetSpawn(Point position) => SpawnPosition = position;
 
         public void UpdatePosition(Vector2 newPosition) => bounds.Position = newPosition;
 

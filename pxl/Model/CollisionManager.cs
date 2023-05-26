@@ -31,7 +31,7 @@ namespace Pxl
     public static class CollisionManager
     {
         private static Level _level;
-        private static CollisionType[,] _collisionMap;
+        private static Tile[,] tileMap;
         private static List<IEntity> _entities;
 
         public static List<List<Rectangle>> PlayerCollisions { get; private set; }
@@ -39,7 +39,7 @@ namespace Pxl
         public static void SetLevel(Level level)
         {
             _level = level;
-            _collisionMap = _level.CollisionMap;
+            tileMap = _level.TileMap;
             _entities = _level.Entities;
         }
 
@@ -89,7 +89,7 @@ namespace Pxl
                 if (!InCollisionBounds(tile))
                     continue;
 
-                if (_collisionMap[tile.Y, tile.X] != CollisionType.None)
+                if (tileMap[tile.Y, tile.X].CollisionType != CollisionType.None)
                 {
                     return new CollisionInfo(CollisionType.Solid, collisionDirection, GetTileInGlobal(tile));
                 }
@@ -118,11 +118,13 @@ namespace Pxl
                 if (!InCollisionBounds(tile))
                     continue;
 
-                var currentCollision = _collisionMap[tile.Y, tile.X];
-                var nextCollision = _collisionMap[tile.Y + ((direction.Y >= 0) ? -1 : 1), tile.X];
+                var currentCollision = tileMap[tile.Y, tile.X].CollisionType;
+                var nextCollision = tileMap[tile.Y + ((direction.Y >= 0) ? -1 : 1), tile.X].CollisionType;
 
                 if (currentCollision != CollisionType.None && nextCollision == CollisionType.None)
                 {
+                    // TODO: Check all tiles to avoid situations, when you mostly staying in solid blocks,
+                    // but bottom collision handle spikes
                     return new CollisionInfo(currentCollision, collisionDirection, GetTileInGlobal(tile));
                 }
             }
@@ -134,7 +136,7 @@ namespace Pxl
             var collisionTiles = new List<List<Rectangle>>();
             var collider = entity.Collider;
 
-            var tileSize = _level.TileSize;
+            var tileSize = LevelManager.TileSet.TileSize;
             var colliderPos = new Point(collider.X / tileSize, collider.Y / tileSize);
             var rightColliderPos =
                 new Point((int)Math.Ceiling((collider.X + collider.Width) / (float)tileSize), 
@@ -149,7 +151,7 @@ namespace Pxl
                 collisionTiles.Add(new List<Rectangle>());
                 for (int i = 0; i < tileCollider.Width; i++)
                 {
-                    var bounds = new Rectangle(colliderPos.X + i, colliderPos.Y + j, _level.TileSize, _level.TileSize);
+                    var bounds = new Rectangle(colliderPos.X + i, colliderPos.Y + j, tileSize, tileSize);
                     collisionTiles[j].Add(bounds);
                 }
             }
@@ -158,7 +160,7 @@ namespace Pxl
         }
 
         private static bool InCollisionBounds(Rectangle rect) 
-            => rect.Y >= 0 && rect.Y < _collisionMap.GetLength(0) && rect.X >= 0 && rect.X < _collisionMap.GetLength(1);
+            => rect.Y >= 0 && rect.Y < tileMap.GetLength(0) && rect.X >= 0 && rect.X < tileMap.GetLength(1);
 
         public static Rectangle GetTileInGlobal(Rectangle tile) 
             => new(tile.X * tile.Width, tile.Y * tile.Height, tile.Width, tile.Height);

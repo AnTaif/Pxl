@@ -20,8 +20,6 @@ namespace Pxl
         {
             return gameObject switch
             {
-                (Ground) => new GroundSprite(gameObject.Bounds, textures["ground"], textures["mountain_fill"]),
-
                 (Platform) => new PlatformSprite(gameObject.Bounds, textures["ground"]),
 
                 (Spikes) => new SpikesSprite(gameObject.Bounds, textures["spikes"]),
