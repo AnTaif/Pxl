@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace Pxl
 {
-    //public abstract class Enemy : IEntity
-    //{
-    //    public readonly CollisionType CollisionType = CollisionType.Enemy;
-
-    //    public abstract Rectangle Collider { get; }
-    //}
+    public class Enemy : Entity
+    {
+        public Enemy(RectangleF bounds) : base(bounds)
+        {
+        }
+    }
 }

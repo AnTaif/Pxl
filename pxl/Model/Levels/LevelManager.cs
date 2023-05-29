@@ -2,10 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace Pxl
 {
@@ -18,7 +16,7 @@ namespace Pxl
 
         public static void LoadMapFromFile(string mapName)
         {
-            var rootDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\.."));
+            var rootDirectory = MainGame.RootDirectory;
             var path = Path.Combine(rootDirectory, $"Model\\Levels\\Maps\\{mapName}");
 
             LoadTileSet(path, Directory.GetFiles(path).Where(file => file.Contains("tileset.json")).First());
@@ -41,7 +39,7 @@ namespace Pxl
                 var stagePath = stages[stage];
                 var jsonText = File.ReadAllText(stagePath);
 
-                var levels = JsonConvert.DeserializeObject<List<Level>>(jsonText);
+                var levels = JsonConvert.DeserializeObject<List<Level>>(jsonText, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto });
 
                 if (!levelsByStage.ContainsKey(stage))
                     levelsByStage.Add(stage, levels);

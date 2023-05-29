@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace Pxl
 {
@@ -12,7 +12,7 @@ namespace Pxl
 
         public int[,] StationaryMap { get; private set; }
         public List<IGameObject> MovingObjects { get; private set; }
-        public List<IEntity> Entities { get; private set; }
+        public List<Entity> Entities { get; private set; }
         public Point SpawnPoint { get; private set; }
 
         public Tile[,] TileMap { get; private set; }
@@ -23,7 +23,7 @@ namespace Pxl
             Point size, 
             int[,] stationaryMap, 
             List<IGameObject> movingObjects,
-            List<IEntity> entities,
+            List<Entity> entities,
             Point spawnPoint
         ) {
             Stage = stage;

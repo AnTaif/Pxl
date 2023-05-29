@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
+using System.IO;
 
 namespace Pxl
 {
@@ -9,6 +11,7 @@ namespace Pxl
         public static readonly (int Width, int Height) RenderSize = (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width,
                 GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height);
         public static readonly (int Width, int Height) WorkingSize = (960, 540); //60, 34 in 16px tiles
+        public static readonly string RootDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\.."));
 
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;

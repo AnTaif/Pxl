@@ -9,6 +9,8 @@ namespace Pxl
     {
         public readonly (int Width, int Height) Screen;
         
+        public Enemy Enemy1 { get; private set; }
+
         public Player Player { get; private set; }
         public GameState State { get; private set; }
 
@@ -18,12 +20,18 @@ namespace Pxl
             State = GameState.Play;
             LevelManager.LoadMapFromFile("TestMap");
             Player = new Player(new RectangleF(LevelManager.CurrentLevel.SpawnPoint.ToVector2(), new Vector2(28, 35)));
+
             CollisionManager.SetLevel(LevelManager.CurrentLevel);
         }
 
         public void Update(GameTime gameTime)
         {
             Player.Update(gameTime);
+
+            foreach(var entity in LevelManager.CurrentLevel.Entities)
+            {
+                entity.Update(gameTime);
+            }
 
             if (Player.Bounds.X >= LevelManager.CurrentLevel.Size.X)
             {

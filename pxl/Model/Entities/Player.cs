@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Pxl
 {
-    public class Player : IEntity
+    public class Player : Entity
     {
         private const float Gravity = 23;
         private const float MaxFallSpeed = 400;
@@ -20,43 +20,25 @@ namespace Pxl
         private const float JumpSpeed = -500;
 
         public bool OnGround { get; private set; }
-        public bool IsAlive { get; private set; }
         public int DeathCount { get; private set; }
         public Point SpawnPosition { get; private set; }
 
-
-        private Vector2 velocity = Vector2.Zero;
-        public Vector2 Velocity { get { return velocity; } }
-
-        private RectangleF bounds;
-        public RectangleF Bounds { get { return bounds; } }
-
-        public Rectangle Collider { get; private set; }
-        public List<List<Rectangle>> Collisions { get; private set; } // CollisionTiles
-
-        public Player(RectangleF bounds)
+        public Player(RectangleF bounds) : base(bounds)
         {
-            this.bounds = bounds;
             Collider = new Rectangle((int)bounds.X+4, (int)bounds.Y, (int)bounds.Width-4, (int)bounds.Height);
-            Collisions = new List<List<Rectangle>>();
+            CollisionTiles = new List<List<Rectangle>>();
             DeathCount = 0;
 ;
             SetSpawn(LevelManager.CurrentLevel.SpawnPoint);
         }
 
-        public void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
             ApplyGravity();
 
             HandleCollisionsWithLevel();
 
-            MovePlayer(gameTime);
-        }
-
-        private void MovePlayer(GameTime gameTime)
-        {
-            bounds.Position += velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            UpdateCollider(gameTime);
+            Move(gameTime);
         }
 
         public void Jump()
@@ -78,7 +60,7 @@ namespace Pxl
                 if (Math.Abs(velocity.X) < MaxSpeed)
                 {
                     velocity.X += inputDirection.X * Speed;
-                    if (Math.Abs(velocity.X) > MaxSpeed) // /TODO: Удалить??????
+                    if (Math.Abs(velocity.X) > MaxSpeed)
                     {
                         velocity.X = Math.Sign(velocity.X) * MaxSpeed;
                     }
@@ -93,14 +75,6 @@ namespace Pxl
             if (velocity.Y < MaxFallSpeed)
                 velocity.Y += Gravity;
         }
-
-        private void UpdateCollider(GameTime gameTime)
-        {
-            Collider = new Rectangle(
-                (int)bounds.X,
-                (int)bounds.Y,
-                (int)bounds.Width, (int)bounds.Height);
-        }
         
         public void HandleCollisionsWithLevel()
         {
@@ -110,7 +84,7 @@ namespace Pxl
             {
                 if (collision.Type == CollisionType.Spikes)
                 {
-                    Deadge();
+                    Death();
                     return;
                 }
 
@@ -146,9 +120,7 @@ namespace Pxl
             }
         }
 
-        public void UpdateCollisions() => Collisions = CollisionManager.GetCollisionTiles(this);
-
-        private void Deadge()
+        private void Death()
         {
             IsAlive = false;
             DeathCount++;

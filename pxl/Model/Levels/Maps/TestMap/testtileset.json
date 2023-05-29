@@ -1,30 +1,110 @@
 {
-        "Tiles": {
+        "tiles":{
                 "0":{
                         "Name": "",
                         "CollisionTypeName": "None",
                         "TargetDirection": "All"
                 },
                 "1":{
-                        "Name": "ground",
+                        "Name": "ground_bottom_center",
                         "CollisionTypeName": "Solid",
                         "TargetDirection": "All"
                 },
                 "2":{
-                        "Name": "mountain_fill",
+                        "Name": "ground_bottom_left",
                         "CollisionTypeName": "Solid",
                         "TargetDirection": "All"
                 },
                 "3":{
-                        "Name": "spikes",
-                        "CollisionTypeName": "Spikes",
-                        "TargetDirection": "Bottom"
+                        "Name": "ground_bottom_right",
+                        "CollisionTypeName": "Solid",
+                        "TargetDirection": "All"
                 },
                 "4":{
-                        "Name": "spikes",
+                        "Name": "ground_center",
+                        "CollisionTypeName": "Solid",
+                        "TargetDirection": "All"
+                },
+                "5":{
+                        "Name": "ground_center_left",
+                        "CollisionTypeName": "Solid",
+                        "TargetDirection": "All"
+                },
+                "6":{
+                        "Name": "ground_center_right",
+                        "CollisionTypeName": "Solid",
+                        "TargetDirection": "All"
+                },
+                "7":{
+                        "Name": "ground_top_center",
+                        "CollisionTypeName": "Solid",
+                        "TargetDirection": "All"
+                },
+                "8":{
+                        "Name": "ground_top_left",
+                        "CollisionTypeName": "Solid",
+                        "TargetDirection": "All"
+                },
+                "9":{
+                        "Name": "ground_top_right",
+                        "CollisionTypeName": "Solid",
+                        "TargetDirection": "All"
+                },
+                "10":{
+                        "Name": "platform_center",
+                        "CollisionTypeName": "Solid",
+                        "TargetDirection": "All"
+                },
+                "11":{
+                        "Name": "platform_left",
+                        "CollisionTypeName": "Solid",
+                        "TargetDirection": "All"
+                },
+                "12":{
+                        "Name": "platform_right",
+                        "CollisionTypeName": "Solid",
+                        "TargetDirection": "All"
+                },
+                "13":{
+                        "Name": "ground_connect_bottom_left",
+                        "CollisionTypeName": "Solid",
+                        "TargetDirection": "All"
+                },
+                "14":{
+                        "Name": "ground_connect_bottom_right",
+                        "CollisionTypeName": "Solid",
+                        "TargetDirection": "All"
+                },
+                "15":{
+                        "Name": "ground_connect_top_left",
+                        "CollisionTypeName": "Solid",
+                        "TargetDirection": "All"
+                },
+                "16":{
+                        "Name": "ground_connect_top_right",
+                        "CollisionTypeName": "Solid",
+                        "TargetDirection": "All"
+                },
+                "17":{
+                        "Name": "spike_down",
+                        "CollisionTypeName": "Spikes",
+                        "TargetDirection": "Top"
+                },
+                "18":{
+                        "Name": "spike_left",
                         "CollisionTypeName": "Spikes",
                         "TargetDirection": "Right"
+                },
+                "19":{
+                        "Name": "spike_right",
+                        "CollisionTypeName": "Spikes",
+                        "TargetDirection": "Left"
+                },
+                "20":{
+                        "Name": "spike_up",
+                        "CollisionTypeName": "Spikes",
+                        "TargetDirection": "Bottom"
                 }
         },
-        "TileSize":16 
+        "tileSize":16 
 }

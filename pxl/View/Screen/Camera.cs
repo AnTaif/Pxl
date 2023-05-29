@@ -16,7 +16,7 @@ namespace Pxl
 
         public Camera()
         {
-            Scale = 2f;
+            Scale = 1f;
         }
 
         public void Follow(Player target, FollowType followType)

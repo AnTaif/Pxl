@@ -11,7 +11,9 @@ namespace Pxl
 {
     public interface ISprite
     {
+        public void LoadContent(ContentManager content);
         public void Draw(SpriteBatch spriteBatch, Vector2 position);
+        public void Update(GameTime gameTime);
     }
 
     public static class SpriteFactory
@@ -20,11 +22,19 @@ namespace Pxl
         {
             return gameObject switch
             {
-                (Platform) => new PlatformSprite(gameObject.Bounds, textures["ground"]),
-
-                (Spikes) => new SpikesSprite(gameObject.Bounds, textures["spikes"]),
+                //(Platform) => new PlatformSprite(gameObject.Bounds, textures["ground"]),
 
                 _ => throw new NotImplementedException("Error when getting sprite"),
+            };
+        }
+
+        public static ISprite CreateSprite(Entity entity, Dictionary<string, Texture2D> textures)
+        {
+            return entity switch
+            {
+                (WalkingEnemy) => new PlayerSprite("Owlet"),
+
+                _ => new EnemySprite(),
             };
         }
     }

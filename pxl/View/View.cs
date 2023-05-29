@@ -1,9 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
+using System.Linq;
+using System.Reflection.Metadata;
 
 namespace Pxl
 {
@@ -18,12 +21,14 @@ namespace Pxl
         private SpriteFont bitmapMC;
 
         private Dictionary<IGameObject, ISprite> levelSprites;
-        private Dictionary<IEntity, ISprite> entitySprites;
+        private Dictionary<Entity, ISprite> entitySprites;
         public PlayerSprite PlayerSprite { get; }
 
         public GameView()
         {
             PlayerSprite = new PlayerSprite("Owlet");
+            levelSprites = new Dictionary<IGameObject, ISprite>();
+            entitySprites = new Dictionary<Entity, ISprite>();
         }
 
         public void LoadContent(SpriteBatch spriteBatch, ContentManager content)
@@ -38,17 +43,34 @@ namespace Pxl
 
             textures = new Dictionary<string, Texture2D>()
             {
-                {"ground", content.Load<Texture2D>("ground") },
                 {"collision", content.Load<Texture2D>("collision") },
                 {"player_collision", content.Load<Texture2D>("player_collision") },
-                {"mountain_fill", content.Load<Texture2D>("mountain_fill") },
-                {"spikes", content.Load<Texture2D>("spikes") },
             };
 
-            levelSprites = new Dictionary<IGameObject, ISprite>();
-            entitySprites = new Dictionary<IEntity, ISprite>();
+            LoadTileTextures(content);
+
+            foreach (var entity in LevelManager.CurrentLevel.Entities)
+            {
+                var sprite = GetOrCreateSprite(entity);
+                sprite.LoadContent(content);
+            }
 
             background.LoadContent(content);
+        }
+
+        private void LoadTileTextures(ContentManager content)
+        {
+            var rootDirectory = MainGame.RootDirectory;
+            var path = Path.Combine(rootDirectory, $"Content\\Level\\Tiles");
+            var contentPath = "Level/Tiles/";
+
+            var files = Directory.GetFiles(path);
+
+            foreach(var file in files)
+            {
+                var fileName = Path.GetFileNameWithoutExtension(file);
+                textures.Add(fileName, content.Load<Texture2D>(contentPath + fileName));
+            }
         }
 
         public void Draw(GameTime gameTime, GameModel model)
@@ -69,18 +91,21 @@ namespace Pxl
                         continue;
 
                     var texture = textures[tileName];
-                    var position = new Vector2(j*tileSize, i*tileSize);
+                    var position = new Vector2(j * tileSize, i * tileSize);
 
                     _spriteBatch.Draw(texture, position, Color.White);
                 }
-            }            
+            }
 
-            //foreach (var gameObject in currentLevel.GameObjects)
-            //{
-            //    var sprite = GetOrCreateSprite(gameObject);
+            DrawMovingObjects();
 
-            //    sprite.Draw(_spriteBatch, gameObject.Position);
-            //}
+            foreach (var entity in LevelManager.CurrentLevel.Entities)
+            {
+                var sprite = entitySprites[entity];
+
+                sprite.Update(gameTime);
+                sprite.Draw(_spriteBatch, entity.Bounds.Position);
+            }
 
             PlayerSprite.Update(gameTime);
             PlayerSprite.Draw(_spriteBatch, model.Player.Bounds.Position);
@@ -89,6 +114,27 @@ namespace Pxl
                 ShowDebug(_spriteBatch, model);
 
             _spriteBatch.End();
+        }
+
+        //private void DrawEntities()
+        //{
+        //    foreach (var entity in LevelManager.CurrentLevel.Entities)
+        //    {
+        //        var sprite = GetOrCreateSprite(entity);
+
+        //        sprite.Update(gameTime);
+        //        sprite.Draw(_spriteBatch, entity.Bounds.Position);
+        //    }
+        //}
+
+        private void DrawMovingObjects()
+        {
+            foreach (var movingObject in LevelManager.CurrentLevel.MovingObjects)
+            {
+                var sprite = GetOrCreateSprite(movingObject);
+
+                sprite.Draw(_spriteBatch, movingObject.Position);
+            }
         }
 
         public ISprite GetOrCreateSprite(IGameObject gameObject)
@@ -100,28 +146,37 @@ namespace Pxl
             return levelSprites[gameObject];
         }
 
+        public ISprite GetOrCreateSprite(Entity entity)
+        {
+            if (entitySprites.ContainsKey(entity))
+                return entitySprites[entity];
+
+            entitySprites[entity] = SpriteFactory.CreateSprite(entity, textures);
+            return entitySprites[entity];
+        }
+
         private void ShowDebug(SpriteBatch spriteBatch, GameModel model)
         {
-            spriteBatch.DrawString(bitmapMC, 
+            spriteBatch.DrawString(bitmapMC,
                 model.Player.Bounds.Position.ToString(), new Vector2(0, 0), Color.White);
 
-            spriteBatch.DrawString(bitmapMC, 
+            spriteBatch.DrawString(bitmapMC,
                 "On ground: " + model.Player.OnGround.ToString(), new Vector2(0, 20), Color.White);
 
-            spriteBatch.DrawString(bitmapMC, 
+            spriteBatch.DrawString(bitmapMC,
                 "Death count: " + model.Player.DeathCount.ToString(), new Vector2(0, 40), Color.White);
 
-            spriteBatch.DrawString(bitmapMC, 
+            spriteBatch.DrawString(bitmapMC,
                 $"Stage: {LevelManager.CurrentLevel.Stage} Level: {LevelManager.CurrentLevel.Id}", new Vector2(0, 60), Color.White);
-            
+
             DrawCollisions(_spriteBatch, model.Player);
         }
 
         public void DrawCollisions(SpriteBatch spriteBatch, IEntity entity)
         {
             _spriteBatch.Draw(textures["player_collision"], entity.Collider, Color.White); // Collider
-            foreach (var collisionRow in entity.Collisions)
-                foreach(var collision in collisionRow)
+            foreach (var collisionRow in entity.CollisionTiles)
+                foreach (var collision in collisionRow)
                     _spriteBatch.Draw(textures["collision"], CollisionManager.GetTileInGlobal(collision), Color.White); // CollisionTile
         }
 

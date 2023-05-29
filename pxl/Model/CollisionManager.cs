@@ -32,7 +32,7 @@ namespace Pxl
     {
         private static Level _level;
         private static Tile[,] tileMap;
-        private static List<IEntity> _entities;
+        private static List<Entity> _entities;
 
         public static List<List<Rectangle>> PlayerCollisions { get; private set; }
 
@@ -43,9 +43,9 @@ namespace Pxl
             _entities = _level.Entities;
         }
 
-        public static void AddEntity(IEntity entity) => _entities.Add(entity);
+        public static void AddEntity(Entity entity) => _entities.Add(entity);
 
-        public static void RemoveEntity(IEntity entity) => _entities.Remove(entity);
+        public static void RemoveEntity(Entity entity) => _entities.Remove(entity);
 
         public static List<CollisionInfo> GetCollisionsWithLevel(IEntity entity)
         {
@@ -53,20 +53,20 @@ namespace Pxl
 
             var direction = entity.Velocity;
 
-            entity.UpdateCollisions();
+            entity.UpdateCollisionTiles();
 
             direction.Normalize();
 
             if (direction.X != 0)
             {
-                var collisionInfo = CheckHorizontalCollision(direction, entity.Collisions);
+                var collisionInfo = CheckHorizontalCollision(direction, entity.CollisionTiles);
                 if (collisionInfo.Type != CollisionType.None)
                     collisionsWithLevel.Add(collisionInfo);
             }
    
             if (direction.Y != 0)
             {
-                var collisionInfo = CheckVerticalCollision(direction, entity.Collisions);
+                var collisionInfo = CheckVerticalCollision(direction, entity.CollisionTiles);
                 collisionsWithLevel.Add(collisionInfo);
             }
 
@@ -88,11 +88,12 @@ namespace Pxl
             for (int i = 1; i < collisionTiles.Count - 1; i++)
             {
                 var tile = direction.X > 0 ? collisionTiles[i].Last() : collisionTiles[i].First();
-                var currentCollision = tileMap[tile.Y, tile.X];
 
                 if (!InCollisionBounds(tile))
                     continue;
 
+                var currentCollision = tileMap[tile.Y, tile.X];
+                
                 if (currentCollision.CollisionType != CollisionType.None)
                 {
                     if (TargetDirectionSameWithCollision(currentCollision.TargetDirection, collisionDirection))
