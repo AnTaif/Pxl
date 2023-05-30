@@ -13,7 +13,7 @@ namespace Pxl
     {
         private readonly SpriteBatch _spriteBatch;
         private readonly Random random = new Random();
-        private readonly (int Width, int Height) Size = MainGame.WorkingSize; 
+        private readonly Size Size = MainGame.WorkingSize; 
 
         private Texture2D sky;
         private Texture2D glacialMountains;

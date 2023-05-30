@@ -18,7 +18,7 @@ namespace Pxl
         {
             Screen = screenSize;
             State = GameState.Play;
-            LevelManager.LoadMapFromFile("TestMap");
+            LevelManager.LoadMap("TestMap");
             Player = new Player(new RectangleF(LevelManager.CurrentLevel.SpawnPoint.ToVector2(), new Vector2(28, 35)));
 
             CollisionManager.SetLevel(LevelManager.CurrentLevel);
@@ -28,12 +28,9 @@ namespace Pxl
         {
             Player.Update(gameTime);
 
-            foreach(var entity in LevelManager.CurrentLevel.Entities)
-            {
-                entity.Update(gameTime);
-            }
+            LevelManager.CurrentLevel.Update(gameTime);
 
-            if (Player.Bounds.X >= LevelManager.CurrentLevel.Size.X)
+            if (Player.Bounds.X >= LevelManager.CurrentLevel.Size.Width)
             {
                 LevelManager.SetNextLevel();
                 CollisionManager.SetLevel(LevelManager.CurrentLevel);

@@ -12,6 +12,8 @@ namespace Pxl
 {
     public class GameView
     {
+        private ContentManager content;
+
         public bool isDebugShowing { get; set; }
 
         private SpriteBatch _spriteBatch;
@@ -34,6 +36,7 @@ namespace Pxl
         public void LoadContent(SpriteBatch spriteBatch, ContentManager content)
         {
             _spriteBatch = spriteBatch;
+            this.content = content;
 
             background = new Background(_spriteBatch);
 
@@ -48,12 +51,6 @@ namespace Pxl
             };
 
             LoadTileTextures(content);
-
-            foreach (var entity in LevelManager.CurrentLevel.Entities)
-            {
-                var sprite = GetOrCreateSprite(entity);
-                sprite.LoadContent(content);
-            }
 
             background.LoadContent(content);
         }
@@ -97,15 +94,9 @@ namespace Pxl
                 }
             }
 
-            DrawMovingObjects();
+            DrawMovingObjects(gameTime);
 
-            foreach (var entity in LevelManager.CurrentLevel.Entities)
-            {
-                var sprite = entitySprites[entity];
-
-                sprite.Update(gameTime);
-                sprite.Draw(_spriteBatch, entity.Bounds.Position);
-            }
+            DrawEntities(gameTime);
 
             PlayerSprite.Update(gameTime);
             PlayerSprite.Draw(_spriteBatch, model.Player.Bounds.Position);
@@ -116,42 +107,45 @@ namespace Pxl
             _spriteBatch.End();
         }
 
-        //private void DrawEntities()
-        //{
-        //    foreach (var entity in LevelManager.CurrentLevel.Entities)
-        //    {
-        //        var sprite = GetOrCreateSprite(entity);
+        private void DrawEntities(GameTime gameTime)
+        {
+            foreach (var entity in LevelManager.CurrentLevel.Entities)
+            {
+                var sprite = GetOrCreateSprite(entity);
 
-        //        sprite.Update(gameTime);
-        //        sprite.Draw(_spriteBatch, entity.Bounds.Position);
-        //    }
-        //}
+                sprite.Update(gameTime);
+                sprite.Draw(_spriteBatch, entity.Bounds.Position);
+            }
+        }
 
-        private void DrawMovingObjects()
+        private void DrawMovingObjects(GameTime gameTime)
         {
             foreach (var movingObject in LevelManager.CurrentLevel.MovingObjects)
             {
                 var sprite = GetOrCreateSprite(movingObject);
 
+                sprite.Update(gameTime);
                 sprite.Draw(_spriteBatch, movingObject.Position);
             }
         }
 
-        public ISprite GetOrCreateSprite(IGameObject gameObject)
+        private ISprite GetOrCreateSprite(IGameObject gameObject)
         {
             if (levelSprites.ContainsKey(gameObject))
                 return levelSprites[gameObject];
 
             levelSprites[gameObject] = SpriteFactory.CreateSprite(gameObject, textures);
+            levelSprites[gameObject].LoadContent(content);
             return levelSprites[gameObject];
         }
 
-        public ISprite GetOrCreateSprite(Entity entity)
+        private ISprite GetOrCreateSprite(Entity entity)
         {
             if (entitySprites.ContainsKey(entity))
                 return entitySprites[entity];
 
             entitySprites[entity] = SpriteFactory.CreateSprite(entity, textures);
+            entitySprites[entity].LoadContent(content);
             return entitySprites[entity];
         }
 
@@ -170,6 +164,8 @@ namespace Pxl
                 $"Stage: {LevelManager.CurrentLevel.Stage} Level: {LevelManager.CurrentLevel.Id}", new Vector2(0, 60), Color.White);
 
             DrawCollisions(_spriteBatch, model.Player);
+            foreach(var entity in LevelManager.CurrentLevel.Entities)
+                DrawCollisions(_spriteBatch, entity);
         }
 
         public void DrawCollisions(SpriteBatch spriteBatch, IEntity entity)

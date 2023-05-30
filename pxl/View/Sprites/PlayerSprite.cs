@@ -81,7 +81,7 @@ namespace Pxl
 
         public Animation GetCurrentAnimation() => _animationManager.CurrentAnimation;
 
-        private string GetDirectionName(Vector2 direction) => direction.X >= 0 ? "right" : "left";
+        private string GetDirectionName(Vector2 direction) => direction.X > 0 ? "right" : "left";
 
         public void Draw(SpriteBatch spriteBatch, Vector2 position) => spriteBatch.Draw(_animationManager.GetCurrentFrame(), position, Color.White);
     }

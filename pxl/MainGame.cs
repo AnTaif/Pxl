@@ -8,9 +8,9 @@ namespace Pxl
 {
     public class MainGame : Game
     {
-        public static readonly (int Width, int Height) RenderSize = (GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width,
+        public static readonly Size RenderSize = new(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width,
                 GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height);
-        public static readonly (int Width, int Height) WorkingSize = (960, 540); //60, 34 in 16px tiles
+        public static readonly Size WorkingSize = new(960, 540); //60, 34 in 16px tiles
         public static readonly string RootDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\.."));
 
         private GraphicsDeviceManager _graphics;
@@ -38,7 +38,7 @@ namespace Pxl
 
         protected override void Initialize()
         {
-            _screen = new Screen(GraphicsDevice, WorkingSize.Width, WorkingSize.Height);
+            _screen = new Screen(GraphicsDevice, WorkingSize);
             _model = new GameModel((_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight));
             _view = new GameView();
             _controller = new GameController(_model, _view);

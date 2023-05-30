@@ -4,53 +4,98 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using Newtonsoft.Json;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Pxl
 {
     public static class LevelManager
     {
         private static Dictionary<int, List<Level>> levelsByStage;
+        private static int currentId = 0;
+        private static int currentStage = 0;
+
+        private static string currentDirectory;
+        private static string tileSetPath;
+        private static List<string> stagePaths;
+
         public static TileSet TileSet { get; private set; }
 
-        public static Level CurrentLevel { get; private set; }
+        public static Level CurrentLevel => levelsByStage[currentStage][currentId];
 
-        public static void LoadMapFromFile(string mapName)
+        private static void InitializePaths(
+                string mapName, 
+                string tileSetName = "tileset.json", 
+                string mapsDirectory = "Model\\Levels\\Maps"
+        )
         {
             var rootDirectory = MainGame.RootDirectory;
-            var path = Path.Combine(rootDirectory, $"Model\\Levels\\Maps\\{mapName}");
-
-            LoadTileSet(path, Directory.GetFiles(path).Where(file => file.Contains("tileset.json")).First());
-
-            LoadLevels(path);
-
-            SetLevel(0, 0);
-        }
-
-        public static void LoadLevels(string path)
-        {
-            levelsByStage = new Dictionary<int, List<Level>>();
-
-            var stages = Directory.GetFiles(path)
+            currentDirectory = Path.Combine(rootDirectory, $"{mapsDirectory}\\{mapName}");
+            tileSetPath = Directory.GetFiles(currentDirectory).Where(file => file.Contains(tileSetName)).First();
+            stagePaths = Directory.GetFiles(currentDirectory)
                 .Where(file => file.Contains("stage"))
                 .ToList();
+        }
 
-            for (int stage = 0; stage < stages.Count; stage++)
+        public static void LoadMap(string mapName)
+        {
+            levelsByStage = new();
+
+            InitializePaths(mapName);
+
+            LoadTileSet(tileSetPath);
+
+            LoadLevels(stagePaths);
+
+            SetLevel(currentId, currentStage);
+        }
+
+        private static void LoadLevels(List<string> stagePaths)
+        {
+            for (int stage = 0; stage < stagePaths.Count; stage++)
             {
-                var stagePath = stages[stage];
-                var jsonText = File.ReadAllText(stagePath);
-
-                var levels = JsonConvert.DeserializeObject<List<Level>>(jsonText, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto });
-
-                if (!levelsByStage.ContainsKey(stage))
-                    levelsByStage.Add(stage, levels);
-                else
-                    levelsByStage[stage] = levels;
+                var stagePath = stagePaths[stage];
+                LoadStage(stage, stagePath);
             }
         }
 
-        public static void LoadTileSet(string path, string tileSetName)
+        private static void LoadStage(int stage, string stagePath)
         {
-            var tileSetPath = Path.Combine(path, tileSetName);
+            var levels = DeserializeLevels(stagePath);
+
+            if (!levelsByStage.ContainsKey(stage))
+                levelsByStage.Add(stage, levels);
+            else
+                levelsByStage[stage] = levels;
+        }
+
+        private static List<Level> DeserializeLevels(string stagePath)
+        {
+            var jsonText = File.ReadAllText(stagePath);
+
+            var levels = JsonConvert.DeserializeObject<List<Level>>(jsonText, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto });
+
+            return levels;
+        }
+
+        public static void ResetLevel(Level level)
+        {
+            var stage = level.Stage;
+            var id = level.Id;
+
+            var levels = DeserializeLevels(stagePaths[stage]);
+
+            levelsByStage[stage][id] = levels[id];
+        }
+
+        public static void ResetLevel(int stage, int id)
+        {
+            var levels = DeserializeLevels(stagePaths[stage]);
+
+            levelsByStage[stage][id] = levels[id];
+        }
+
+        public static void LoadTileSet(string tileSetPath)
+        {
             var jsonText = File.ReadAllText(tileSetPath);
 
             TileSet = JsonConvert.DeserializeObject<TileSet>(jsonText);
@@ -58,33 +103,44 @@ namespace Pxl
 
         public static void SetNextLevel()
         {
-            var stage = CurrentLevel.Stage;
-            var id = CurrentLevel.Id;
-
-            if (levelsByStage[stage].Count > id + 1)
+            if (levelsByStage[currentStage].Count > currentId + 1)
+                currentId++;
+            else if (levelsByStage.ContainsKey(currentStage + 1))
             {
-                id++;
-            }
-            else if (levelsByStage.ContainsKey(stage + 1))
-            {
-                stage++;
-                id = 0;
+                currentStage++;
+                currentId = 0;
             }
             else
             {
-                stage = 0;
-                id = 0;
+                currentStage = 0;
+                currentId = 0;
             }
-
-            SetLevel(stage, id);
         }
 
-        public static void SetLevel(int currentStage, int currentId)
+        public static void SetLevel(int stage, int id)
         {
-            if (levelsByStage.ContainsKey(currentStage) && levelsByStage[currentStage].Count > 0)
-                CurrentLevel = levelsByStage[currentStage][currentId];
+            if (levelsByStage.ContainsKey(stage) && levelsByStage[stage].Count > 0)
+            {
+                currentStage = stage;
+                currentId = id;
+            }
             else
                 throw new ArgumentException($"Не существует уровня на {currentStage} этаже с {currentId} id");
+        }
+
+        public static List<Level> GetLevels()
+        {
+            var levels = new List<Level>();
+
+            foreach(var levelList in levelsByStage.Values)
+            {
+                foreach(var level in levelList)
+                {
+                    levels.Add(level);
+                }
+            }
+
+            return levels;
         }
     }
 }

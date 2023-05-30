@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using Size = System.Drawing.Size;
 
 namespace Pxl
 {
@@ -9,22 +10,20 @@ namespace Pxl
         private readonly static int MinDim = 64;
         private readonly static int MaxDim = 4096;
 
-        public int Width { get; private set; }
-        public int Height { get; private set; }
+        public Size Size { get; private set; }
 
         private bool isDisposed;
         private GraphicsDevice _graphics;
         private RenderTarget2D _target;
         private bool isSet;
 
-        public Screen(GraphicsDevice graphics, int width, int height)
+        public Screen(GraphicsDevice graphics, Size size)
         {
-            Width = MathHelper.Clamp(width, MinDim, MaxDim);
-            Height = MathHelper.Clamp(height, MinDim, MaxDim);
+            Size = new(MathHelper.Clamp(size.Width, MinDim, MaxDim), MathHelper.Clamp(size.Height, MinDim, MaxDim));
 
             _graphics = graphics;
 
-            _target = new RenderTarget2D(_graphics, Width, Height);
+            _target = new RenderTarget2D(_graphics, Size.Width, Size.Height);
             isSet = false;
         }
 
@@ -74,7 +73,7 @@ namespace Pxl
         {
             var backbufferBounds = _graphics.PresentationParameters.Bounds;
             var backbufferAspectRatio = (float)backbufferBounds.Width / backbufferBounds.Height;
-            var screenAspectRatio = (float)Width / Height;
+            var screenAspectRatio = (float)Size.Width / Size.Height;
 
             var rx = 0f;
             var ry = 0f;

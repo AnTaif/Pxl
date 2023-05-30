@@ -29,6 +29,11 @@ namespace Pxl
             UpdateCollider(gameTime);
         }
 
+        public void ApplyGravity(float gravity)
+        {
+            velocity.Y += gravity;
+        }
+
         private void UpdateCollider(GameTime gameTime)
         {
             Collider = new Rectangle((int)bounds.X, (int)bounds.Y, (int)bounds.Width, (int)bounds.Height);

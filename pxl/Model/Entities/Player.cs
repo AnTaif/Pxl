@@ -34,7 +34,8 @@ namespace Pxl
 
         public override void Update(GameTime gameTime)
         {
-            ApplyGravity();
+            if (velocity.Y < MaxFallSpeed)
+                ApplyGravity(Gravity);
 
             HandleCollisionsWithLevel();
 
@@ -68,12 +69,6 @@ namespace Pxl
             }
             else // If the player is trying to move in the opposite direction, change direction immediately
                 velocity.X = inputDirection.X * Speed; //- velocity.X;
-        }
-
-        public void ApplyGravity()
-        {
-            if (velocity.Y < MaxFallSpeed)
-                velocity.Y += Gravity;
         }
         
         public void HandleCollisionsWithLevel()
@@ -124,6 +119,7 @@ namespace Pxl
         {
             IsAlive = false;
             DeathCount++;
+            LevelManager.ResetLevel(LevelManager.CurrentLevel);
             bounds.Position = SpawnPosition.ToVector2();
         }
 
