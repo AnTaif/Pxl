@@ -7,9 +7,13 @@ using System.Threading.Tasks;
 
 namespace Pxl
 {
-    public class Enemy : Entity
+    public abstract class Enemy : Entity
     {
         public Enemy(RectangleF bounds) : base(bounds)
+        {
+        }
+
+        protected override void Death()
         {
         }
     }

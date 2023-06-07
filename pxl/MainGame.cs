@@ -6,6 +6,8 @@ using System.IO;
 
 namespace Pxl
 {
+    public enum State { Pause, Play, Menu}
+
     public class MainGame : Game
     {
         public static readonly Size RenderSize = new(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width,
@@ -13,22 +15,21 @@ namespace Pxl
         public static readonly Size WorkingSize = new(960, 540); //60, 34 in 16px tiles
         public static readonly string RootDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\.."));
 
-        private GraphicsDeviceManager _graphics;
-        private SpriteBatch _spriteBatch;
-        private GameModel _model;
-        private GameView _view;
-        private GameController _controller;
+        private GraphicsDeviceManager graphics;
+        private SpriteBatch spriteBatch;
+        private GameModel model;
+        private GameView view;
+        private GameController controller;
 
-        private Screen _screen;
+        private Screen screen;
 
         public MainGame()
         {
-            _graphics = new GraphicsDeviceManager(this)
+            graphics = new GraphicsDeviceManager(this)
             {
-                PreferredBackBufferWidth = 1650, //RenderSize.Width,
-                PreferredBackBufferHeight = 930, //RenderSize.Height,
-                //IsFullScreen = true,
-                SynchronizeWithVerticalRetrace = true
+                PreferredBackBufferWidth = 1650,
+                PreferredBackBufferHeight = 850,
+                IsFullScreen = false
             };
             IsMouseVisible = true;
             Window.AllowUserResizing = true;
@@ -38,18 +39,18 @@ namespace Pxl
 
         protected override void Initialize()
         {
-            _screen = new Screen(GraphicsDevice, WorkingSize);
-            _model = new GameModel((_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight));
-            _view = new GameView();
-            _controller = new GameController(_model, _view);
+            screen = new Screen(GraphicsDevice, WorkingSize);
+            model = new GameModel();
+            view = new GameView();
+            controller = new GameController(model, view);
 
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            _spriteBatch = new SpriteBatch(GraphicsDevice);
-            _view.LoadContent(_spriteBatch, Content);
+            spriteBatch = new SpriteBatch(GraphicsDevice);
+            view.LoadContent(spriteBatch, Content);
         }
 
         protected override void Update(GameTime gameTime)
@@ -57,21 +58,24 @@ namespace Pxl
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            _controller.Update(gameTime);
-            _model.Update(gameTime);
+            controller.Update(gameTime);
+
+            model.Update(gameTime);
 
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            _screen.Set();
+            screen.Set();
             GraphicsDevice.Clear(Color.Black);
 
-            _view.Draw(gameTime, _model);
+            view.Update(gameTime);
 
-            _screen.UnSet();
-            _screen.Present(_spriteBatch);
+            view.Draw(gameTime, model);
+
+            screen.UnSet();
+            screen.Present(spriteBatch);
 
             base.Draw(gameTime);
         }

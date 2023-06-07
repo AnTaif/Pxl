@@ -17,11 +17,6 @@ namespace Pxl
 
         private Texture2D sky;
         private Texture2D glacialMountains;
-        private Texture2D cloudsMg3;
-        private Texture2D cloudsMg2;
-        private Texture2D cloudsMg1;
-        private Texture2D cloudsBg;
-        private Texture2D cloudLonely;
 
         private List<Cloud> movingClouds;
         private List<Cloud> bgClouds;
@@ -29,35 +24,59 @@ namespace Pxl
         public Background(SpriteBatch spriteBatch)
         {
             _spriteBatch = spriteBatch;
+
+            movingClouds = new List<Cloud>()
+            {
+                new Cloud("cloud_lonely", new Vector2(Size.Width, random.Next(10, 160)), new Point(215, 73), (float)random.NextDouble() + 0.5f),
+                new Cloud("cloud_lonely",  new Vector2(Size.Width + random.Next(50, 400), random.Next(10, 160)), new Point(215, 73), (float)random.NextDouble() + 0.5f),
+                new Cloud("clouds_mg_3", new Vector2(0, 0), new Point(Size.Width, Size.Height), 0.2f),
+                new Cloud("clouds_mg_3", new Vector2(Size.Width, 0), new Point(Size.Width, Size.Height), 0.2f),
+                new Cloud("clouds_mg_2", new Vector2(0, 0), new Point(Size.Width, Size.Height), 0.4f),
+                new Cloud("clouds_mg_2", new Vector2(Size.Width, 0), new Point(Size.Width, Size.Height), 0.4f),
+                new Cloud("clouds_mg_1", new Vector2(0, 0), new Point(Size.Width, Size.Height), 0.6f),
+                new Cloud("clouds_mg_1", new Vector2(Size.Width, 0), new Point(Size.Width, Size.Height), 0.6f)
+            };
+
+            bgClouds = new List<Cloud>()
+            {
+                new Cloud("clouds_bg", new Vector2(0, 0), new Point(Size.Width, Size.Height), 0.01f),
+                new Cloud("clouds_bg", new Vector2(Size.Width, 0), new Point(Size.Width, Size.Height), 0.01f)
+            };
         }
 
         public void LoadContent(ContentManager content)
         {
             sky = content.Load<Texture2D>("background/sky");
             glacialMountains = content.Load<Texture2D>("background/glacial_mountains");
-            cloudsMg3 = content.Load<Texture2D>("background/clouds_mg_3");
-            cloudsMg2 = content.Load<Texture2D>("background/clouds_mg_2");
-            cloudsMg1 = content.Load<Texture2D>("background/clouds_mg_1");
-            cloudsBg = content.Load<Texture2D>("background/clouds_bg");
-            cloudLonely = content.Load<Texture2D>("background/cloud_lonely");
+            LoadClouds(content, movingClouds);
+            LoadClouds(content, bgClouds);
+        }
 
-            movingClouds = new List<Cloud>()
+        private void LoadClouds(ContentManager content, List<Cloud> clouds)
+        {
+            foreach(var cloud in clouds)
             {
-                new Cloud(cloudLonely, new Vector2(Size.Width, random.Next(10, 160)), new Point(cloudLonely.Width, cloudLonely.Height), (float)random.NextDouble() + 0.5f),
-                new Cloud(cloudLonely,  new Vector2(Size.Width + random.Next(50, 400), random.Next(10, 160)), new Point(cloudLonely.Width, cloudLonely.Height), (float)random.NextDouble() + 0.5f),
-                new Cloud(cloudsMg3, new Vector2(0, 0), new Point(Size.Width, Size.Height), 0.2f),
-                new Cloud(cloudsMg3, new Vector2(Size.Width, 0), new Point(Size.Width, Size.Height), 0.2f),
-                new Cloud(cloudsMg2, new Vector2(0, 0), new Point(Size.Width, Size.Height), 0.4f),
-                new Cloud(cloudsMg2, new Vector2(Size.Width, 0), new Point(Size.Width, Size.Height), 0.4f),
-                new Cloud(cloudsMg1, new Vector2(0, 0), new Point(Size.Width, Size.Height), 0.6f),
-                new Cloud(cloudsMg1, new Vector2(Size.Width, 0), new Point(Size.Width, Size.Height), 0.6f)
-            };
+                cloud.LoadContent(content);
+            }
+        }
 
-            bgClouds = new List<Cloud>()
+        public void Update(GameTime gameTime)
+        {
+            UpdateClouds(gameTime, bgClouds);
+            UpdateClouds(gameTime, movingClouds);
+        }
+
+        public void UpdateClouds(GameTime gameTime, List<Cloud> clouds)
+        {
+            foreach (var cloud in clouds)
             {
-                new Cloud(cloudsBg, new Vector2(0, 0), new Point(Size.Width, Size.Height), 0.01f),
-                new Cloud(cloudsBg, new Vector2(Size.Width, 0), new Point(Size.Width, Size.Height), 0.01f)
-            };
+                cloud.Update(gameTime);
+                if (cloud.Position.X + cloud.Size.X <= 0)
+                    if (cloud.RootName.Equals("cloud_lonely"))
+                        cloud.ReCreate(new Vector2(Size.Width, random.Next(10, 160)), new Point(215, 73), (float)random.NextDouble() + 0.5f);
+                    else
+                        cloud.ReCreate(new Vector2(cloud.Size.X + (cloud.Position.X + cloud.Size.X), 0));
+            }
         }
 
         public void Draw(GameTime gameTime)
@@ -76,12 +95,6 @@ namespace Pxl
             foreach (var cloud in clouds)
             {
                 cloud.Draw(_spriteBatch);
-                cloud.Update(gameTime);
-                if (cloud.Position.X + cloud.Size.X <= 0)
-                    if (cloud.Texture == cloudLonely)
-                        cloud.ReCreate(new Vector2(Size.Width, random.Next(10, 160)), new Point(cloudLonely.Width, cloudLonely.Height), (float)random.NextDouble() + 0.5f);
-                    else
-                        cloud.ReCreate(new Vector2(cloud.Size.X + (cloud.Position.X + cloud.Size.X), 0));
             }
         }
     }

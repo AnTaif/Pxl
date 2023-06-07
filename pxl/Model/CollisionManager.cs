@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Pxl
 {
-    public enum CollisionType { None, Solid, Spikes, Enemy}
+    public enum CollisionType { None, Solid, Spikes, Enemy, Player}
     public enum CollisionDirection { All, Left, Top, Right, Bottom}
 
     public class CollisionInfo
@@ -33,8 +33,22 @@ namespace Pxl
         private static Level _level;
         private static Tile[,] tileMap;
         private static List<Entity> _entities;
+        private static Player player;
 
         public static List<List<Rectangle>> PlayerCollisions { get; private set; }
+
+        public static void Initialize(Player player, Level level)
+        {
+            CollisionManager.player = player;
+            _level = level;
+            tileMap = _level.TileMap;
+            _entities = _level.Entities;
+        }
+
+        public static void SetPlayer(Player player)
+        {
+            CollisionManager.player = player;
+        }
 
         public static void SetLevel(Level level)
         {
@@ -47,7 +61,7 @@ namespace Pxl
 
         public static void RemoveEntity(Entity entity) => _entities.Remove(entity);
 
-        public static List<CollisionInfo> GetCollisionsWithLevel(IEntity entity)
+        public static List<CollisionInfo> GetCollisionsWithLevel(Entity entity)
         {
             var collisionsWithLevel = new List<CollisionInfo>();
 
@@ -154,7 +168,80 @@ namespace Pxl
         private static bool TargetDirectionSameWithCollision(CollisionDirection target, CollisionDirection collision)
             => target == CollisionDirection.All || target == collision;
 
-        public static List<List<Rectangle>> GetCollisionTiles(IEntity entity)
+        public static List<CollisionInfo> GetCollisionWithEntities(IEntity entity)
+        {
+            var collisions = new List<CollisionInfo>();
+
+            foreach(var currentEntity in _entities)
+            {
+                if (!currentEntity.IsAlive)
+                    continue;
+
+                if (currentEntity == entity)
+                    continue;
+
+                if (currentEntity.Collider.Intersects(entity.Collider))
+                {
+                    var direction = GetCollisionDirection(entity.Collider, currentEntity.Collider);
+                    Console.WriteLine($"Collision with Entity: {direction}");
+                    collisions.Add(new CollisionInfo(CollisionType.Enemy, direction));
+                }
+            }
+
+            return collisions;
+        }
+
+        public static List<CollisionInfo> GetCollisionsWithPlayer(IEntity entity)
+        {
+            var collisions = new List<CollisionInfo>();
+
+            if (player.Collider.Intersects(entity.Collider))
+            {
+                var direction = GetCollisionDirection(entity.Collider, player.Collider);
+                Console.WriteLine($"Collision with Player: {direction}");
+                collisions.Add(new CollisionInfo(CollisionType.Player, direction));
+            }
+
+            return collisions;
+        }
+
+        private static CollisionDirection GetCollisionDirection(Rectangle currentRect, Rectangle intersectionRect) // rect1 intersects rect2
+        {
+            // Calculate the distance between the centers of the rectangles
+            Vector2 centerA = new Vector2(intersectionRect.X + intersectionRect.Width / 2, intersectionRect.Y + intersectionRect.Height / 2);
+            Vector2 centerB = new Vector2(currentRect.X + currentRect.Width / 2, currentRect.Y + currentRect.Height / 2);
+            Vector2 distance = centerA - centerB;
+
+            // Calculate the minimum distance between the rectangles' edges
+            float minDistanceX = (intersectionRect.Width + currentRect.Width) / 2;
+            float minDistanceY = (intersectionRect.Height + currentRect.Height) / 2;
+
+            // Check the collision direction based on the distances
+            if (Math.Abs(distance.X) < minDistanceX && Math.Abs(distance.Y) < minDistanceY)
+            {
+                float offsetX = minDistanceX - Math.Abs(distance.X);
+                float offsetY = minDistanceY - Math.Abs(distance.Y);
+
+                if (offsetX < offsetY)
+                {
+                    if (distance.X < 0)
+                        return CollisionDirection.Left;
+                    else
+                        return CollisionDirection.Right;
+                }
+                else
+                {
+                    if (distance.Y < 0)
+                        return CollisionDirection.Top;
+                    else
+                        return CollisionDirection.Bottom;
+                }
+            }
+
+            return CollisionDirection.All;
+        }
+
+        public static List<List<Rectangle>> GetCollisionTiles(Entity entity)
         {
             var collisionTiles = new List<List<Rectangle>>();
             var collider = entity.Collider;

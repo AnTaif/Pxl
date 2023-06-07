@@ -8,13 +8,15 @@ using System.Threading.Tasks;
 
 namespace Pxl
 {
-    public abstract class WalkingEnemy : Enemy
+    public abstract class FlyingEnemy : Enemy
     {
+        private const float MaxSpeed = 200f;
+
         public Vector2 LeftRange { get; private set; }
         public Vector2 RightRange { get; private set; }
 
         [JsonConstructor]
-        public WalkingEnemy(RectangleF bounds, float direction = 1, Point? leftRange = null, Point? rightRange = null)
+        public FlyingEnemy(RectangleF bounds, float direction = 1, Point? leftRange = null, Point? rightRange = null) 
             : base(bounds)
         {
             Collider = new Rectangle((int)bounds.X + 4, (int)bounds.Y, (int)bounds.Width - 4, (int)bounds.Height);
@@ -28,9 +30,6 @@ namespace Pxl
         {
             if (!IsAlive)
                 return;
-
-            if (velocity.Y < MaxFallSpeed)
-                ApplyGravity(GameModel.Gravity);
 
             ApplyHorizontalMove();
 
@@ -71,7 +70,14 @@ namespace Pxl
 
         private void ApplyHorizontalMove()
         {
-            velocity.X = Direction.X * Speed;
+            if (Math.Abs(velocity.X) < MaxSpeed)
+            {
+                velocity.X += Direction.X * Speed;
+                if (Math.Abs(velocity.X) > MaxSpeed)
+                {
+                    velocity.X = Math.Sign(velocity.X) * MaxSpeed;
+                }
+            }
 
             if (velocity.X > 0 && Bounds.Right >= RightRange.X)
             {

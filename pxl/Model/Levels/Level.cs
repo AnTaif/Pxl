@@ -12,7 +12,6 @@ namespace Pxl
         public readonly Size Size;
 
         public int[,] StationaryMap { get; private set; }
-        public List<IGameObject> MovingObjects { get; private set; }
         public List<Entity> Entities { get; private set; }
         public Point SpawnPoint { get; private set; }
 
@@ -23,7 +22,6 @@ namespace Pxl
             int stage, int id,
             Size size, 
             int[,] stationaryMap, 
-            List<IGameObject> movingObjects,
             List<Entity> entities,
             Point spawnPoint
         ) {
@@ -31,7 +29,6 @@ namespace Pxl
             Id = id;
             Size = size;
             StationaryMap = stationaryMap;
-            MovingObjects = movingObjects;
             Entities = entities;
             SpawnPoint = spawnPoint;
 

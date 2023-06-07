@@ -18,6 +18,21 @@ namespace Pxl
         {
             InputHandler.UpdateState();
 
+            HandlePlayerMovement();
+
+            if (InputHandler.IsPressedOnce(Keys.F3))
+                _view.IsDebugShowing = !_view.IsDebugShowing;
+        }
+
+        public void HandleEsc()
+        {
+            if (InputHandler.IsPressedOnce(Keys.Escape))
+            {
+            }
+        }
+
+        private void HandlePlayerMovement()
+        {
             var inputDirection = InputHandler.GetMoveDirection();
             _model.Player.ApplyHorizontalMove(inputDirection);
 
@@ -37,9 +52,6 @@ namespace Pxl
 
             if (inputDirection.X != 0)
                 _view.PlayerSprite.ChangeSpriteDirection(inputDirection);
-
-            if (InputHandler.IsPressedOnce(Keys.F3))
-                _view.isDebugShowing = !_view.isDebugShowing;
         }
     }
 }

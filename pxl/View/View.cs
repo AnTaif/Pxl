@@ -1,54 +1,47 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.IO;
-using System.Linq;
-using System.Reflection.Metadata;
 
 namespace Pxl
 {
-    public class GameView
+    public class GameView : IGameView
     {
         private ContentManager content;
 
-        public bool isDebugShowing { get; set; }
+        public bool IsDebugShowing { get; set; }
+        public DebugView debugView;
 
-        private SpriteBatch _spriteBatch;
+        private SpriteBatch spriteBatch;
         private Background background;
 
         private Dictionary<string, Texture2D> textures;
-        private SpriteFont bitmapMC;
+        private SpriteFont font;
 
-        private Dictionary<IGameObject, ISprite> levelSprites;
-        private Dictionary<Entity, ISprite> entitySprites;
+        private Dictionary<IEntity, IAnimatedSprite> entitySprites;
         public PlayerSprite PlayerSprite { get; }
 
         public GameView()
         {
             PlayerSprite = new PlayerSprite("Owlet");
-            levelSprites = new Dictionary<IGameObject, ISprite>();
-            entitySprites = new Dictionary<Entity, ISprite>();
+            entitySprites = new Dictionary<IEntity, IAnimatedSprite>();
+            textures = new Dictionary<string, Texture2D>();
+            debugView = new DebugView();
         }
 
         public void LoadContent(SpriteBatch spriteBatch, ContentManager content)
         {
-            _spriteBatch = spriteBatch;
+            this.spriteBatch = spriteBatch;
             this.content = content;
 
-            background = new Background(_spriteBatch);
+            background = new Background(spriteBatch);
 
             PlayerSprite.LoadContent(content);
 
-            bitmapMC = content.Load<SpriteFont>("Fonts/BitmapMC");
+            font = content.Load<SpriteFont>("Fonts/BitmapMC");
 
-            textures = new Dictionary<string, Texture2D>()
-            {
-                {"collision", content.Load<Texture2D>("collision") },
-                {"player_collision", content.Load<Texture2D>("player_collision") },
-            };
+            debugView.LoadContent(spriteBatch, content);
 
             LoadTileTextures(content);
 
@@ -70,9 +63,29 @@ namespace Pxl
             }
         }
 
+        public void Update(GameTime gameTime)
+        {
+            background.Update(gameTime);
+            PlayerSprite.Update(gameTime);
+            UpdateEntities(gameTime);
+        }
+
+        public void UpdateEntities(GameTime gameTime)
+        {
+            foreach(var entityItem in entitySprites)
+            {
+                var entity = entityItem.Key;
+                var entitySprite = entityItem.Value;
+
+                entitySprite.Update(gameTime);
+                entitySprite.PlayAnimation("walk", entity.Direction);
+            }
+        }
+
         public void Draw(GameTime gameTime, GameModel model)
         {
-            _spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, Matrix.CreateScale(1f));
+            spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, Matrix.CreateScale(1f));
+
             var currentLevel = LevelManager.CurrentLevel;
 
             background.Draw(gameTime);
@@ -90,90 +103,41 @@ namespace Pxl
                     var texture = textures[tileName];
                     var position = new Vector2(j * tileSize, i * tileSize);
 
-                    _spriteBatch.Draw(texture, position, Color.White);
+                    spriteBatch.Draw(texture, position, Color.White);
                 }
             }
 
-            DrawMovingObjects(gameTime);
-
             DrawEntities(gameTime);
 
-            PlayerSprite.Update(gameTime);
-            PlayerSprite.Draw(_spriteBatch, model.Player.Bounds.Position);
+            PlayerSprite.Draw(spriteBatch, model.Player.Bounds.Position);
 
-            if (isDebugShowing)
-                ShowDebug(_spriteBatch, model);
+            if (IsDebugShowing)
+                debugView.Draw(gameTime, model);
 
-            _spriteBatch.End();
+            spriteBatch.End();
         }
 
         private void DrawEntities(GameTime gameTime)
         {
             foreach (var entity in LevelManager.CurrentLevel.Entities)
             {
+                if (!entity.IsAlive)
+                    continue;
+
                 var sprite = GetOrCreateSprite(entity);
 
-                sprite.Update(gameTime);
-                sprite.Draw(_spriteBatch, entity.Bounds.Position);
+                sprite.Draw(spriteBatch, entity.Bounds.Position);
             }
         }
 
-        private void DrawMovingObjects(GameTime gameTime)
-        {
-            foreach (var movingObject in LevelManager.CurrentLevel.MovingObjects)
-            {
-                var sprite = GetOrCreateSprite(movingObject);
-
-                sprite.Update(gameTime);
-                sprite.Draw(_spriteBatch, movingObject.Position);
-            }
-        }
-
-        private ISprite GetOrCreateSprite(IGameObject gameObject)
-        {
-            if (levelSprites.ContainsKey(gameObject))
-                return levelSprites[gameObject];
-
-            levelSprites[gameObject] = SpriteFactory.CreateSprite(gameObject, textures);
-            levelSprites[gameObject].LoadContent(content);
-            return levelSprites[gameObject];
-        }
-
-        private ISprite GetOrCreateSprite(Entity entity)
+        private IAnimatedSprite GetOrCreateSprite(IEntity entity)
         {
             if (entitySprites.ContainsKey(entity))
                 return entitySprites[entity];
 
-            entitySprites[entity] = SpriteFactory.CreateSprite(entity, textures);
+            entitySprites[entity] = SpriteFactory.CreateAnimatedSprite(entity);
             entitySprites[entity].LoadContent(content);
             return entitySprites[entity];
-        }
-
-        private void ShowDebug(SpriteBatch spriteBatch, GameModel model)
-        {
-            spriteBatch.DrawString(bitmapMC,
-                model.Player.Bounds.Position.ToString(), new Vector2(0, 0), Color.White);
-
-            spriteBatch.DrawString(bitmapMC,
-                "On ground: " + model.Player.OnGround.ToString(), new Vector2(0, 20), Color.White);
-
-            spriteBatch.DrawString(bitmapMC,
-                "Death count: " + model.Player.DeathCount.ToString(), new Vector2(0, 40), Color.White);
-
-            spriteBatch.DrawString(bitmapMC,
-                $"Stage: {LevelManager.CurrentLevel.Stage} Level: {LevelManager.CurrentLevel.Id}", new Vector2(0, 60), Color.White);
-
-            DrawCollisions(_spriteBatch, model.Player);
-            foreach(var entity in LevelManager.CurrentLevel.Entities)
-                DrawCollisions(_spriteBatch, entity);
-        }
-
-        public void DrawCollisions(SpriteBatch spriteBatch, IEntity entity)
-        {
-            _spriteBatch.Draw(textures["player_collision"], entity.Collider, Color.White); // Collider
-            foreach (var collisionRow in entity.CollisionTiles)
-                foreach (var collision in collisionRow)
-                    _spriteBatch.Draw(textures["collision"], CollisionManager.GetTileInGlobal(collision), Color.White); // CollisionTile
         }
 
         public static List<Texture2D> LoadContentFolder(ContentManager content, string folder)
@@ -192,5 +156,11 @@ namespace Pxl
             }
             return result;
         }
+    }
+
+    public interface IGameView
+    {
+        public void LoadContent(SpriteBatch spriteBatch, ContentManager content);
+        public void Draw(GameTime gameTime, GameModel model);
     }
 }

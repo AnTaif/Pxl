@@ -3,25 +3,18 @@ using System;
 
 namespace Pxl
 {
-    public enum GameState { Menu, Play, Pause, GameOver }
-
     public class GameModel
     {
-        public readonly (int Width, int Height) Screen;
-        
-        public Enemy Enemy1 { get; private set; }
+        public static readonly float Gravity = 23;
 
         public Player Player { get; private set; }
-        public GameState State { get; private set; }
 
-        public GameModel((int Width, int Height) screenSize)
+        public GameModel()
         {
-            Screen = screenSize;
-            State = GameState.Play;
             LevelManager.LoadMap("TestMap");
             Player = new Player(new RectangleF(LevelManager.CurrentLevel.SpawnPoint.ToVector2(), new Vector2(28, 35)));
 
-            CollisionManager.SetLevel(LevelManager.CurrentLevel);
+            CollisionManager.Initialize(Player, LevelManager.CurrentLevel);
         }
 
         public void Update(GameTime gameTime)

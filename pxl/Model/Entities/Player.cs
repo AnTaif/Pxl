@@ -13,13 +13,9 @@ namespace Pxl
 {
     public class Player : Entity
     {
-        private const float Gravity = 23;
-        private const float MaxFallSpeed = 400;
         private const float MaxSpeed = 220;
-        private const float Speed = 15f;
         private const float JumpSpeed = -500;
 
-        public bool OnGround { get; private set; }
         public int DeathCount { get; private set; }
         public Point SpawnPosition { get; private set; }
 
@@ -28,14 +24,32 @@ namespace Pxl
             Collider = new Rectangle((int)bounds.X+4, (int)bounds.Y, (int)bounds.Width-4, (int)bounds.Height);
             CollisionTiles = new List<List<Rectangle>>();
             DeathCount = 0;
-;
+            Speed = 15f;
+
+            SetSpawn(LevelManager.CurrentLevel.SpawnPoint);
+        }
+
+        public Player(RectangleF bounds, float speed) : base(bounds)
+        {
+            Collider = new Rectangle((int)bounds.X + 4, (int)bounds.Y, (int)bounds.Width - 4, (int)bounds.Height);
+            CollisionTiles = new List<List<Rectangle>>();
+            DeathCount = 0;
+            Speed = speed;
+
             SetSpawn(LevelManager.CurrentLevel.SpawnPoint);
         }
 
         public override void Update(GameTime gameTime)
         {
-            if (velocity.Y < MaxFallSpeed)
-                ApplyGravity(Gravity);
+            ApplyGravity(GameModel.Gravity);
+
+            var collisionsE = CollisionManager.GetCollisionWithEntities(this);
+            if (collisionsE.Any(c => c.Type == CollisionType.Enemy && c.Direction != CollisionDirection.Bottom))
+                ApplyDeath();
+
+            else if (collisionsE.Any(c => c.Type == CollisionType.Enemy && c.Direction == CollisionDirection.Bottom)){
+                Jump();
+            }
 
             HandleCollisionsWithLevel();
 
@@ -70,54 +84,48 @@ namespace Pxl
             else // If the player is trying to move in the opposite direction, change direction immediately
                 velocity.X = inputDirection.X * Speed; //- velocity.X;
         }
-        
-        public void HandleCollisionsWithLevel()
+
+        protected override void HandleCollisionWithLevel(CollisionInfo collision)
         {
-            var collisionsWithLevel = CollisionManager.GetCollisionsWithLevel(this);
-
-            foreach (var collision in collisionsWithLevel)
+            if (collision.Type == CollisionType.Spikes)
             {
-                if (collision.Type == CollisionType.Spikes)
-                {
-                    Death();
-                    return;
-                }
+                ApplyDeath();
+                return;
+            }
 
-                switch (collision.Direction)
-                {
-                    case CollisionDirection.Right:
-                        velocity.X = -4;
+            switch (collision.Direction)
+            {
+                case CollisionDirection.Right:
+                    velocity.X = -4;
+                    break;
+
+                case CollisionDirection.Left:
+                    velocity.X = 4;
+                    break;
+                case CollisionDirection.Top:
+                    if (collision.Type == CollisionType.None)
                         break;
 
-                    case CollisionDirection.Left:
-                        velocity.X = 4;
-                        break;
-                    case CollisionDirection.Top:
-                        if (collision.Type == CollisionType.None)
-                            break;
+                    velocity.Y = 0;
+                    OnGround = false;
+                    break;
 
-                        velocity.Y = 0;
+                case CollisionDirection.Bottom:
+                    if (collision.Type == CollisionType.None)
+                    {
                         OnGround = false;
                         break;
+                    }
 
-                    case CollisionDirection.Bottom:
-                        if (collision.Type == CollisionType.None)
-                        {
-                            OnGround = false;
-                            break;
-                        }
-
-                        bounds.Position = new Vector2(bounds.X, collision.InteractionTile.Y - bounds.Height + 1);
-                        velocity.Y = 0;
-                        OnGround = true;
-                        break;
-                }
+                    bounds.Position = new Vector2(bounds.X, collision.InteractionTile.Y - bounds.Height + 1);
+                    velocity.Y = 0;
+                    OnGround = true;
+                    break;
             }
         }
 
-        private void Death()
+        protected override void Death()
         {
-            IsAlive = false;
             DeathCount++;
             LevelManager.ResetLevel(LevelManager.CurrentLevel);
             bounds.Position = SpawnPosition.ToVector2();

@@ -3,34 +3,33 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Pxl
 {
-    public class EnemySprite : ISprite
+    public class EnemySprite : AnimatedSprite
     {
-        private Texture2D texture;
-
-        public EnemySprite()
+        public EnemySprite(string rootName) : base(rootName)
         {
-
         }
 
-        public void Draw(SpriteBatch spriteBatch, Vector2 position)
+        public override void LoadContent(ContentManager content)
         {
-            spriteBatch.Draw(texture, position, Color.White);
-        }
+            var rootTexture = content.Load<Texture2D>($"{rootName}/{Path.GetFileName(rootName.ToLower())}");
 
-        public void LoadContent(ContentManager content)
-        {
-            texture = content.Load<Texture2D>("collision");
-        }
+            animationManager.PlayAnimation(new Animation(new List<Texture2D>() { rootTexture }, 0.2f, "default"), "default");
 
-        public void Update(GameTime gameTime)
-        {
-            return;
+            var rightWalkFrames = GameView.LoadContentFolder(content, $"{rootName}/walk/right");
+            var leftWalkFrames = GameView.LoadContentFolder(content, $"{rootName}/walk/left");
+
+            animations = new Dictionary<string, Animation>()
+            {
+                { "walk/right", new Animation(rightWalkFrames, 0.1f, "walk") },
+                { "walk/left", new Animation(leftWalkFrames, 0.1f, "walk") },
+            };
         }
     }
 }

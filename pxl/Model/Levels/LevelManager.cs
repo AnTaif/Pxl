@@ -1,10 +1,8 @@
-﻿using Microsoft.Xna.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using Newtonsoft.Json;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace Pxl
 {
@@ -58,6 +56,13 @@ namespace Pxl
             }
         }
 
+        private static Level LoadLevel(string jsonText)
+        {
+            var level = JsonConvert.DeserializeObject<Level>(jsonText, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto });
+
+            return level;
+        }
+
         private static void LoadStage(int stage, string stagePath)
         {
             var levels = DeserializeLevels(stagePath);
@@ -83,8 +88,11 @@ namespace Pxl
             var id = level.Id;
 
             var levels = DeserializeLevels(stagePaths[stage]);
+            var currentLevel = levels[id];
 
-            levelsByStage[stage][id] = levels[id];
+            levelsByStage[stage][id] = currentLevel;
+
+            CollisionManager.SetLevel(currentLevel);
         }
 
         public static void ResetLevel(int stage, int id)
@@ -92,6 +100,13 @@ namespace Pxl
             var levels = DeserializeLevels(stagePaths[stage]);
 
             levelsByStage[stage][id] = levels[id];
+        }
+
+        public static void ResetStage(int stage)
+        {
+            var levels = DeserializeLevels(stagePaths[stage]);
+
+            levelsByStage[stage] = levels;
         }
 
         public static void LoadTileSet(string tileSetPath)
@@ -114,6 +129,7 @@ namespace Pxl
             {
                 currentStage = 0;
                 currentId = 0;
+                ResetStage(currentStage);
             }
         }
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -8,16 +9,17 @@ using System.Threading.Tasks;
 
 namespace Pxl
 {
-    public class Cloud
+    public class Cloud : Sprite
     {
-        public readonly Texture2D Texture;
+        public readonly string RootName;
+
         public Vector2 Position;
         public Point Size;
         private float speed;
 
-        public Cloud(Texture2D texture, Vector2 position, Point size, float speed)
+        public Cloud(string name, Vector2 position, Point size, float speed)
         {
-            Texture = texture;
+            RootName = $"background/{name}";
             Position = position;
             Size = size;
             this.speed = speed;
@@ -35,7 +37,7 @@ namespace Pxl
             this.speed = speed;
         }
 
-        public void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
             var xPos = Position.X - speed;
             Position = new Vector2(xPos, Position.Y);
@@ -44,6 +46,11 @@ namespace Pxl
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(Texture, Position, Color.White);
+        }
+
+        public override void LoadContent(ContentManager content)
+        {
+            Texture = content.Load<Texture2D>(RootName);
         }
     }
 }
