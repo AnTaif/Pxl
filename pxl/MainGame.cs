@@ -28,8 +28,10 @@ namespace Pxl
         {
             graphics = new GraphicsDeviceManager(this)
             {
-                PreferredBackBufferWidth = 1650,
-                PreferredBackBufferHeight = 850,
+                PreferredBackBufferWidth = 1440,
+                PreferredBackBufferHeight = 810,
+                //PreferredBackBufferWidth = RenderSize.Width,
+                //PreferredBackBufferHeight = RenderSize.Height,
                 IsFullScreen = false
             };
             IsMouseVisible = true;
@@ -80,6 +82,13 @@ namespace Pxl
             screen.Present(spriteBatch);
 
             base.Draw(gameTime);
+        }
+
+        public void NewGame()
+        {
+            GameState = new GameState(this);
+            GameState.LoadContent(spriteBatch, Content);
+            CurrentState = GameState;
         }
 
         public void ChangeState(IState state) => CurrentState = state;

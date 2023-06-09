@@ -134,6 +134,5 @@ namespace Pxl
         public void SetSpawn(Point position) => SpawnPosition = position;
 
         public void UpdatePosition(Vector2 newPosition) => bounds.Position = newPosition;
-
     }
 }

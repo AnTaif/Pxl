@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,34 +10,29 @@ using System.Threading.Tasks;
 
 namespace Pxl.States
 {
-    public class GameMenuState : IState
+    public class GameMenuState : Menu
     {
         private Texture2D buttonTexture;
         private SpriteFont buttonFont;
         private SpriteBatch spriteBatch;
 
-        private List<Button> buttons;
-
-        private MainGame game;
-
-        public GameMenuState(MainGame game)
+        public GameMenuState(MainGame game) : base(game)
         {
-            this.game = game;
-
             var resumeGameButton = new Button("Resume Game", new Rectangle(300, 200, 400, 10));
             resumeGameButton.Click += ResumeGameClick;
 
-            var quitGameButton = new Button("Quit Game", new Rectangle(300, 300, 400, 10));
+            var mainMenuButton = new Button("Main Menu", new Rectangle(300, 300, 400, 10));
+            mainMenuButton.Click += MainMenuClick;
+
+            var quitGameButton = new Button("Quit Game", new Rectangle(300, 400, 400, 10));
             quitGameButton.Click += QuitGameClick;
 
-            buttons = new List<Button>()
-            {
-                resumeGameButton,
-                quitGameButton,
-            };
+            buttons.Add(resumeGameButton);
+            buttons.Add(mainMenuButton);
+            buttons.Add(quitGameButton);
         }
 
-        public void LoadContent(SpriteBatch spriteBatch, ContentManager content)
+        public override void LoadContent(SpriteBatch spriteBatch, ContentManager content)
         {
             this.spriteBatch = spriteBatch;
 
@@ -49,13 +45,16 @@ namespace Pxl.States
             }
         }
 
-        public void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
-            foreach (var component in buttons)
-                component.Update(gameTime);
+            if (InputHandler.IsPressedOnce(Keys.Escape))
+                game.ChangeState(game.GameState);
+
+            foreach (var button in buttons)
+                button.Update(gameTime);
         }
 
-        public void Draw(GameTime gameTime)
+        public override void Draw(GameTime gameTime)
         {
             game.GraphicsDevice.Clear(Color.CornflowerBlue);
             spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, Matrix.CreateScale(1f));
@@ -64,16 +63,6 @@ namespace Pxl.States
                 button.Draw(gameTime, spriteBatch);
 
             spriteBatch.End();
-        }
-
-        private void ResumeGameClick(object sender, EventArgs e)
-        {
-            game.ChangeState(game.GameState);
-        }
-
-        private void QuitGameClick(object sender, EventArgs e)
-        {
-            game.Exit();
         }
     }
 }

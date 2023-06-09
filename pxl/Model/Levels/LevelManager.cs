@@ -44,7 +44,7 @@ namespace Pxl
 
             LoadLevels(stagePaths);
 
-            SetLevel(currentId, currentStage);
+            SetLevel(0, 0);
         }
 
         private static void LoadLevels(List<string> stagePaths)
