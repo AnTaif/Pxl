@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Pxl
 {
-    public class GameController
+    public class GameController : IGameController
     {
         private readonly GameModel _model;
         private readonly GameView _view;
@@ -16,8 +16,6 @@ namespace Pxl
 
         public void Update(GameTime gameTime)
         {
-            InputHandler.UpdateState();
-
             HandlePlayerMovement();
 
             if (InputHandler.IsPressedOnce(Keys.F3))
@@ -53,5 +51,10 @@ namespace Pxl
             if (inputDirection.X != 0)
                 _view.PlayerSprite.ChangeSpriteDirection(inputDirection);
         }
+    }
+
+    public interface IGameController
+    {
+        public void Update(GameTime gameTime);
     }
 }

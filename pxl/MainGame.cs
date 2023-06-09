@@ -1,13 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Pxl.States;
 using System;
 using System.IO;
 
 namespace Pxl
 {
-    public enum State { Pause, Play, Menu}
-
     public class MainGame : Game
     {
         public static readonly Size RenderSize = new(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width,
@@ -17,9 +16,11 @@ namespace Pxl
 
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
-        private GameModel model;
-        private GameView view;
-        private GameController controller;
+
+        public GameState GameState { get; private set; }
+        public MainMenuState MainMenuState { get; private set; }
+        public GameMenuState GameMenuState { get; private set; }
+        public IState CurrentState { get; private set; }
 
         private Screen screen;
 
@@ -40,9 +41,13 @@ namespace Pxl
         protected override void Initialize()
         {
             screen = new Screen(GraphicsDevice, WorkingSize);
-            model = new GameModel();
-            view = new GameView();
-            controller = new GameController(model, view);
+            InputHandler.SetScreen(screen);
+
+            GameState = new GameState(this);
+            MainMenuState = new MainMenuState(this);
+            GameMenuState = new GameMenuState(this);
+
+            CurrentState = MainMenuState;
 
             base.Initialize();
         }
@@ -50,17 +55,16 @@ namespace Pxl
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            view.LoadContent(spriteBatch, Content);
+            GameState.LoadContent(spriteBatch, Content);
+            MainMenuState.LoadContent(spriteBatch, Content);
+            GameMenuState.LoadContent(spriteBatch, Content);
         }
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+            InputHandler.UpdateState();
 
-            controller.Update(gameTime);
-
-            model.Update(gameTime);
+            CurrentState.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -70,14 +74,14 @@ namespace Pxl
             screen.Set();
             GraphicsDevice.Clear(Color.Black);
 
-            view.Update(gameTime);
-
-            view.Draw(gameTime, model);
+            CurrentState.Draw(gameTime);
 
             screen.UnSet();
             screen.Present(spriteBatch);
 
             base.Draw(gameTime);
         }
+
+        public void ChangeState(IState state) => CurrentState = state;
     }
 }

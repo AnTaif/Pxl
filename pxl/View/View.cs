@@ -11,7 +11,7 @@ namespace Pxl
         private ContentManager content;
 
         public bool IsDebugShowing { get; set; }
-        public DebugView debugView;
+        private DebugView debugView;
 
         private SpriteBatch spriteBatch;
         private Background background;

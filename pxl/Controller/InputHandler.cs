@@ -12,19 +12,27 @@ namespace Pxl
 {
     static class InputHandler
     {
-        private static KeyboardState state = Keyboard.GetState();
-        private static KeyboardState previousState;
+        private static MouseState currentMouseState = Mouse.GetState();
+        private static MouseState previousMouseState;
 
-        public static KeyboardState GetState() => state;
-        public static KeyboardState GetPreviousState() => previousState;
+        private static KeyboardState currentKeyboardState = Keyboard.GetState();
+        private static KeyboardState previousKeyboardState;
+
+        private static Screen currentScreen;
+
+        public static KeyboardState GetState() => currentKeyboardState;
+        public static KeyboardState GetPreviousState() => previousKeyboardState;
 
         public static void UpdateState()
         {
-            previousState = state;
-            state = Keyboard.GetState();
+            previousKeyboardState = currentKeyboardState;
+            currentKeyboardState = Keyboard.GetState();
+
+            previousMouseState = currentMouseState;
+            currentMouseState = Mouse.GetState();
         }
 
-        public static bool IsPressedOnce(Keys key) => state.IsKeyDown(key) && !previousState.IsKeyDown(key);
+        public static bool IsPressedOnce(Keys key) => currentKeyboardState.IsKeyDown(key) && !previousKeyboardState.IsKeyDown(key);
 
         public static Vector2 GetMoveDirection()
         {
@@ -32,17 +40,31 @@ namespace Pxl
 
             if (IsRightPress())
                 direction += new Vector2(1, 0);
-            //direction.Normalize();
 
             if (IsLeftPress())
                 direction -= new Vector2(1, 0);
-            //direction.Normalize();
 
             return direction;
         }
 
-        public static bool IsJumpPress() => state.IsKeyDown(Keys.Space);
-        public static bool IsRightPress() => state.IsKeyDown(Keys.Right) || state.IsKeyDown(Keys.D);
-        public static bool IsLeftPress() => state.IsKeyDown(Keys.Left) || state.IsKeyDown(Keys.A);
+        public static bool IsJumpPress() => currentKeyboardState.IsKeyDown(Keys.Space);
+        public static bool IsRightPress() => currentKeyboardState.IsKeyDown(Keys.Right) || currentKeyboardState.IsKeyDown(Keys.D);
+        public static bool IsLeftPress() => currentKeyboardState.IsKeyDown(Keys.Left) || currentKeyboardState.IsKeyDown(Keys.A);
+
+        public static void SetScreen(Screen screen)
+        {
+            currentScreen = screen;
+        }
+
+        public static Rectangle GetMouseRectangle()
+        {
+            var mouseScreenPosition = new Vector2(currentMouseState.X, currentMouseState.Y);
+            var mouseWorldPosition = currentScreen.ConvertScreenPositionToWorld(mouseScreenPosition);
+
+            return new Rectangle((int)mouseWorldPosition.X, (int)mouseWorldPosition.Y, 1, 1);
+        }
+
+        public static bool Clicked() 
+            => currentMouseState.LeftButton == ButtonState.Released && previousMouseState.LeftButton == ButtonState.Pressed;
     }
 }
