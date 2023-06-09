@@ -168,10 +168,8 @@ namespace Pxl
         private static bool TargetDirectionSameWithCollision(CollisionDirection target, CollisionDirection collision)
             => target == CollisionDirection.All || target == collision;
 
-        public static List<CollisionInfo> GetCollisionWithEntities(IEntity entity)
+        public static void HandleCollisionWithEntities(IEntity entity)
         {
-            var collisions = new List<CollisionInfo>();
-
             foreach(var currentEntity in _entities)
             {
                 if (!currentEntity.IsAlive)
@@ -182,13 +180,13 @@ namespace Pxl
 
                 if (currentEntity.Collider.Intersects(entity.Collider))
                 {
-                    var direction = GetCollisionDirection(entity.Collider, currentEntity.Collider);
-                    Console.WriteLine($"Collision with Entity: {direction}");
-                    collisions.Add(new CollisionInfo(CollisionType.Enemy, direction));
+                    var directionWithCurrentEntity = GetCollisionDirection(entity.Collider, currentEntity.Collider);
+                    var directionWithEntity = GetCollisionDirection(currentEntity.Collider, entity.Collider);
+
+                    entity.HandleCollisionWithEntity(new CollisionInfo(currentEntity.Type, directionWithCurrentEntity));
+                    currentEntity.HandleCollisionWithEntity(new CollisionInfo(entity.Type, directionWithEntity));
                 }
             }
-
-            return collisions;
         }
 
         public static List<CollisionInfo> GetCollisionsWithPlayer(IEntity entity)

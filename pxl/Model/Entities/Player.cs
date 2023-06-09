@@ -26,6 +26,8 @@ namespace Pxl
             DeathCount = 0;
             Speed = 15f;
 
+            Type = CollisionType.Player;
+
             SetSpawn(LevelManager.CurrentLevel.SpawnPoint);
         }
 
@@ -36,6 +38,8 @@ namespace Pxl
             DeathCount = 0;
             Speed = speed;
 
+            Type = CollisionType.Player;
+
             SetSpawn(LevelManager.CurrentLevel.SpawnPoint);
         }
 
@@ -43,13 +47,7 @@ namespace Pxl
         {
             ApplyGravity(GameModel.Gravity);
 
-            var collisionsE = CollisionManager.GetCollisionWithEntities(this);
-            if (collisionsE.Any(c => c.Type == CollisionType.Enemy && c.Direction != CollisionDirection.Bottom))
-                ApplyDeath();
-
-            else if (collisionsE.Any(c => c.Type == CollisionType.Enemy && c.Direction == CollisionDirection.Bottom)){
-                Jump();
-            }
+            CollisionManager.HandleCollisionWithEntities(this);
 
             HandleCollisionsWithLevel();
 
@@ -134,5 +132,14 @@ namespace Pxl
         public void SetSpawn(Point position) => SpawnPosition = position;
 
         public void UpdatePosition(Vector2 newPosition) => bounds.Position = newPosition;
+
+        public override void HandleCollisionWithEntity(CollisionInfo collision)
+        {
+            if (collision.Type == CollisionType.Enemy && collision.Direction != CollisionDirection.Bottom)
+                ApplyDeath();
+
+            else if (collision.Type == CollisionType.Enemy && collision.Direction == CollisionDirection.Bottom)
+                Jump();
+        }
     }
 }

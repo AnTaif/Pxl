@@ -14,5 +14,11 @@ namespace Pxl
         {
             Speed = 30;
         }
+
+        public override void HandleCollisionWithEntity(CollisionInfo collision)
+        {
+            if (collision.Type == CollisionType.Player && collision.Direction == CollisionDirection.Top)
+                ApplyDeath();
+        }
     }
 }

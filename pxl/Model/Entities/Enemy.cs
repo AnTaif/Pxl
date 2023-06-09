@@ -11,6 +11,7 @@ namespace Pxl
     {
         public Enemy(RectangleF bounds) : base(bounds)
         {
+            Type = CollisionType.Enemy;
         }
 
         protected override void Death()

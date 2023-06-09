@@ -11,15 +11,16 @@ namespace Pxl
         private readonly int ColliderOffset = 4;
         protected readonly float MaxFallSpeed = 400;
 
+        public bool IsAlive { get; protected set; }
         public float Speed { get; protected set; }
+        public bool OnGround { get; protected set; }
+
         protected RectangleF bounds;
         public RectangleF Bounds => bounds;
-        public bool OnGround { get; protected set; }
+
         public Rectangle Collider { get; protected set; }
-
         public List<List<Rectangle>> CollisionTiles { get; protected set; }
-
-        public bool IsAlive { get; protected set; }
+        public CollisionType Type { get; protected set; }
 
         protected Vector2 velocity;
         public Vector2 Velocity => velocity;
@@ -60,6 +61,8 @@ namespace Pxl
         }
 
         protected abstract void HandleCollisionWithLevel(CollisionInfo collision);
+
+        public abstract void HandleCollisionWithEntity(CollisionInfo collision);
 
         public void ApplyDeath()
         {
@@ -104,5 +107,7 @@ namespace Pxl
         public Vector2 Velocity { get; }
         public void Update(GameTime gameTime);
         public void UpdateCollisionTiles();
+        public CollisionType Type { get; }
+        public void HandleCollisionWithEntity(CollisionInfo collision);
     }
 }
