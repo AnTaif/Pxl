@@ -1,17 +1,15 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 
 namespace Pxl
 {
-    public class Screen : IDisposable
+    public class Screen
     {
         private readonly static int MinDim = 64;
         private readonly static int MaxDim = 4096;
 
         public Size WorldSize { get; private set; }
 
-        private bool isDisposed;
         private GraphicsDevice graphics;
         private RenderTarget2D target;
 
@@ -22,17 +20,6 @@ namespace Pxl
             this.graphics = graphics;
 
             target = new RenderTarget2D(this.graphics, WorldSize.Width, WorldSize.Height);
-        }
-
-        public void Dispose()
-        {
-            if (isDisposed)
-            {
-                return;
-            }
-
-            target?.Dispose();
-            isDisposed = true;
         }
 
         public void Set() => graphics.SetRenderTarget(target);

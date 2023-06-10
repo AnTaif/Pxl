@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Pxl
 {
-    public class Player : Entity
+    public class Player : Creature
     {
         private const float MaxSpeed = 220;
         private const float JumpSpeed = -500;
@@ -47,7 +47,7 @@ namespace Pxl
         {
             ApplyGravity(GameModel.Gravity);
 
-            CollisionManager.HandleCollisionWithEntities(this);
+            CollisionManager.HandleCollisionWithCreatures(this);
 
             HandleCollisionsWithLevel();
 
@@ -87,7 +87,7 @@ namespace Pxl
         {
             if (collision.Type == CollisionType.Spikes)
             {
-                ApplyDeath();
+                Death();
                 return;
             }
 
@@ -122,24 +122,26 @@ namespace Pxl
             }
         }
 
-        protected override void Death()
+        public override void Death()
         {
+            base.Death();
             DeathCount++;
             LevelManager.ResetLevel(LevelManager.CurrentLevel);
             bounds.Position = SpawnPosition.ToVector2();
+            velocity = Vector2.Zero;
         }
 
         public void SetSpawn(Point position) => SpawnPosition = position;
 
         public void UpdatePosition(Vector2 newPosition) => bounds.Position = newPosition;
 
-        public override void HandleCollisionWithEntity(CollisionInfo collision)
+        public override void HandleCollisionWithCreature(CollisionInfo collision)
         {
             if (collision.Type == CollisionType.Enemy && collision.Direction != CollisionDirection.Bottom)
-                ApplyDeath();
+                Death();
 
             else if (collision.Type == CollisionType.Enemy && collision.Direction == CollisionDirection.Bottom)
-                Jump();
+                velocity.Y = -20;
         }
     }
 }

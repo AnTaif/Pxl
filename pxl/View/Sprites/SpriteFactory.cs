@@ -1,12 +1,10 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
+﻿using System;
 
 namespace Pxl
 {
     public static class SpriteFactory
     {
-        public static IAnimatedSprite CreateAnimatedSprite(IEntity entity) => entity switch
+        public static IAnimatedSprite CreateAnimatedSprite(ICreature creature) => creature switch
         {
             (Snake) => new EnemySprite("Enemies/snake"),
 

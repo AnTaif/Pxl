@@ -3,22 +3,18 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace Pxl.States
+namespace Pxl
 {
-    public class GameMenuState : MenuState
+    public class EndMenuState : MenuState
     {
-        public GameMenuState(MainGame game) : base(game)
+        public EndMenuState(MainGame game) : base(game)
         {
-            var resumeGameButton = new Button("Продолжить", new Rectangle(395, 200, 170, 40));
-            resumeGameButton.Click += ResumeGameClick;
-
             var mainMenuButton = new Button("Главное Меню", new Rectangle(395, 300, 170, 40));
             mainMenuButton.Click += MainMenuClick;
 
             var quitGameButton = new Button("Выход", new Rectangle(395, 400, 170, 40));
             quitGameButton.Click += QuitGameClick;
 
-            AddButton(resumeGameButton);
             AddButton(mainMenuButton);
             AddButton(quitGameButton);
         }
@@ -39,6 +35,7 @@ namespace Pxl.States
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
+            spriteBatch.DrawString(buttonFont, "Конец", new Vector2(450, 100), Color.Black);
         }
     }
 }

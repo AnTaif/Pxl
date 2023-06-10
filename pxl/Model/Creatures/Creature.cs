@@ -6,7 +6,7 @@ using System.Security;
 
 namespace Pxl
 {
-    public abstract class Entity : IEntity
+    public abstract class Creature : ICreature
     {
         private readonly int ColliderOffset = 4;
         protected readonly float MaxFallSpeed = 400;
@@ -25,7 +25,7 @@ namespace Pxl
         protected Vector2 velocity;
         public Vector2 Velocity => velocity;
 
-        public Entity(RectangleF bounds)
+        public Creature(RectangleF bounds)
         {
             this.bounds = bounds;
             IsAlive = true;
@@ -62,20 +62,11 @@ namespace Pxl
 
         protected abstract void HandleCollisionWithLevel(CollisionInfo collision);
 
-        public abstract void HandleCollisionWithEntity(CollisionInfo collision);
+        public abstract void HandleCollisionWithCreature(CollisionInfo collision);
 
-        public void ApplyDeath()
-        {
-            IsAlive = false;
-            Death();
-        }
+        public virtual void Death() => IsAlive = false;
 
-        protected abstract void Death();
-
-        public void SetVelocity(Vector2 velocity)
-        {
-            this.velocity = velocity;
-        }
+        public void SetVelocity(Vector2 velocity) => this.velocity = velocity;
 
         protected void ChangeHorizontalDirection()
         {
@@ -96,18 +87,18 @@ namespace Pxl
         public void UpdateCollisionTiles() => CollisionTiles = CollisionManager.GetCollisionTiles(this);
     }
 
-    public interface IEntity
+    public interface ICreature
     {
         public RectangleF Bounds { get; }
         public Rectangle Collider { get; }
         public List<List<Rectangle>> CollisionTiles { get; }
         public Vector2 Direction { get; }
         public bool IsAlive { get; }
-        public void ApplyDeath();
+        public void Death();
         public Vector2 Velocity { get; }
         public void Update(GameTime gameTime);
         public void UpdateCollisionTiles();
         public CollisionType Type { get; }
-        public void HandleCollisionWithEntity(CollisionInfo collision);
+        public void HandleCollisionWithCreature(CollisionInfo collision);
     }
 }

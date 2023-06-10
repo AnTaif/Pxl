@@ -14,7 +14,7 @@ namespace Pxl
             LevelManager.LoadMap("TestMap");
             Player = new Player(new RectangleF(LevelManager.CurrentLevel.SpawnPoint.ToVector2(), new Vector2(28, 35)));
 
-            CollisionManager.Initialize(Player, LevelManager.CurrentLevel);
+            CollisionManager.SetLevel(LevelManager.CurrentLevel);
         }
 
         public void Update(GameTime gameTime)
@@ -25,11 +25,16 @@ namespace Pxl
 
             if (Player.Bounds.X >= LevelManager.CurrentLevel.Size.Width)
             {
-                LevelManager.SetNextLevel();
-                CollisionManager.SetLevel(LevelManager.CurrentLevel);
-                Player.UpdatePosition(new Vector2(0, Player.Bounds.Y - 4));
-                Player.SetSpawn(LevelManager.CurrentLevel.SpawnPoint);
+                SetNextLevel();
             }
+        }
+
+        private void SetNextLevel()
+        {
+            LevelManager.SetNextLevel();
+            CollisionManager.SetLevel(LevelManager.CurrentLevel);
+            Player.UpdatePosition(new Vector2(0, Player.Bounds.Y - 4));
+            Player.SetSpawn(LevelManager.CurrentLevel.SpawnPoint);
         }
     }
 }

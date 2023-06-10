@@ -19,13 +19,13 @@ namespace Pxl
         private Dictionary<string, Texture2D> textures;
         private SpriteFont font;
 
-        private Dictionary<IEntity, IAnimatedSprite> entitySprites;
+        private Dictionary<ICreature, IAnimatedSprite> creatureSprites;
         public PlayerSprite PlayerSprite { get; }
 
         public GameView()
         {
             PlayerSprite = new PlayerSprite("Owlet");
-            entitySprites = new Dictionary<IEntity, IAnimatedSprite>();
+            creatureSprites = new Dictionary<ICreature, IAnimatedSprite>();
             textures = new Dictionary<string, Texture2D>();
             debugView = new DebugView();
         }
@@ -67,12 +67,12 @@ namespace Pxl
         {
             background.Update(gameTime);
             PlayerSprite.Update(gameTime);
-            UpdateEntities(gameTime);
+            UpdateCreatures(gameTime);
         }
 
-        public void UpdateEntities(GameTime gameTime)
+        public void UpdateCreatures(GameTime gameTime)
         {
-            foreach(var entityItem in entitySprites)
+            foreach(var entityItem in creatureSprites)
             {
                 var entity = entityItem.Key;
                 var entitySprite = entityItem.Value;
@@ -84,10 +84,6 @@ namespace Pxl
 
         public void Draw(GameTime gameTime, GameModel model)
         {
-            spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, Matrix.CreateScale(1f));
-
-            var currentLevel = LevelManager.CurrentLevel;
-
             background.Draw(gameTime);
             var tileSize = LevelManager.TileSet.TileSize;
 
@@ -107,37 +103,35 @@ namespace Pxl
                 }
             }
 
-            DrawEntities(gameTime);
+            DrawCreatures(gameTime);
 
             PlayerSprite.Draw(spriteBatch, model.Player.Bounds.Position);
 
             if (IsDebugShowing)
                 debugView.Draw(gameTime, model);
-
-            spriteBatch.End();
         }
 
-        private void DrawEntities(GameTime gameTime)
+        private void DrawCreatures(GameTime gameTime)
         {
-            foreach (var entity in LevelManager.CurrentLevel.Entities)
+            foreach (var creature in LevelManager.CurrentLevel.Creatures)
             {
-                if (!entity.IsAlive)
+                if (!creature.IsAlive)
                     continue;
 
-                var sprite = GetOrCreateSprite(entity);
+                var sprite = GetOrCreateSprite(creature);
 
-                sprite.Draw(spriteBatch, entity.Bounds.Position);
+                sprite.Draw(spriteBatch, creature.Bounds.Position);
             }
         }
 
-        private IAnimatedSprite GetOrCreateSprite(IEntity entity)
+        private IAnimatedSprite GetOrCreateSprite(ICreature creature)
         {
-            if (entitySprites.ContainsKey(entity))
-                return entitySprites[entity];
+            if (creatureSprites.ContainsKey(creature))
+                return creatureSprites[creature];
 
-            entitySprites[entity] = SpriteFactory.CreateAnimatedSprite(entity);
-            entitySprites[entity].LoadContent(content);
-            return entitySprites[entity];
+            creatureSprites[creature] = SpriteFactory.CreateAnimatedSprite(creature);
+            creatureSprites[creature].LoadContent(content);
+            return creatureSprites[creature];
         }
 
         public static List<Texture2D> LoadContentFolder(ContentManager content, string folder)

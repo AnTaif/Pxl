@@ -16,6 +16,8 @@ namespace Pxl
         private static string tileSetPath;
         private static List<string> stagePaths;
 
+        private static Action onEnd;
+
         public static TileSet TileSet { get; private set; }
 
         public static Level CurrentLevel => levelsByStage[currentStage][currentId];
@@ -54,13 +56,6 @@ namespace Pxl
                 var stagePath = stagePaths[stage];
                 LoadStage(stage, stagePath);
             }
-        }
-
-        private static Level LoadLevel(string jsonText)
-        {
-            var level = JsonConvert.DeserializeObject<Level>(jsonText, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto });
-
-            return level;
         }
 
         private static void LoadStage(int stage, string stagePath)
@@ -126,11 +121,12 @@ namespace Pxl
                 currentId = 0;
             }
             else
-            {
-                currentStage = 0;
-                currentId = 0;
-                ResetStage(currentStage);
-            }
+                onEnd();
+        }
+
+        public static void SetOnEnd(Action onEnd)
+        {
+            LevelManager.onEnd = onEnd;
         }
 
         public static void SetLevel(int stage, int id)

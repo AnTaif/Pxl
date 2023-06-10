@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using System.Linq;
 
 namespace Pxl
 {
@@ -12,7 +11,7 @@ namespace Pxl
         public readonly Size Size;
 
         public int[,] StationaryMap { get; private set; }
-        public List<Entity> Entities { get; private set; }
+        public List<Creature> Creatures { get; private set; }
         public Point SpawnPoint { get; private set; }
 
         public Tile[,] TileMap { get; private set; }
@@ -22,14 +21,14 @@ namespace Pxl
             int stage, int id,
             Size size, 
             int[,] stationaryMap, 
-            List<Entity> entities,
+            List<Creature> entities,
             Point spawnPoint
         ) {
             Stage = stage;
             Id = id;
             Size = size;
             StationaryMap = stationaryMap;
-            Entities = entities;
+            Creatures = entities;
             SpawnPoint = spawnPoint;
 
             TileMap = ConvertToCollisionMap(StationaryMap);
@@ -42,7 +41,7 @@ namespace Pxl
 
         public void UpdateEntities(GameTime gameTime)
         {
-            Entities.ForEach(entity => entity.Update(gameTime));
+            Creatures.ForEach(entity => entity.Update(gameTime));
         }
 
         public Tile[,] ConvertToCollisionMap(int[,] stationaryMap)

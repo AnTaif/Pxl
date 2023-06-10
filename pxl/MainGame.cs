@@ -20,6 +20,7 @@ namespace Pxl
         public GameState GameState { get; private set; }
         public MainMenuState MainMenuState { get; private set; }
         public GameMenuState GameMenuState { get; private set; }
+        public EndMenuState EndMenuState { get; private set; }
         public IState CurrentState { get; private set; }
 
         private Screen screen;
@@ -28,8 +29,8 @@ namespace Pxl
         {
             graphics = new GraphicsDeviceManager(this)
             {
-                PreferredBackBufferWidth = 1440,
-                PreferredBackBufferHeight = 810,
+                PreferredBackBufferWidth = 1632,
+                PreferredBackBufferHeight = 918,
                 //PreferredBackBufferWidth = RenderSize.Width,
                 //PreferredBackBufferHeight = RenderSize.Height,
                 IsFullScreen = false
@@ -48,6 +49,7 @@ namespace Pxl
             GameState = new GameState(this);
             MainMenuState = new MainMenuState(this);
             GameMenuState = new GameMenuState(this);
+            EndMenuState = new EndMenuState(this);
 
             CurrentState = MainMenuState;
 
@@ -60,6 +62,7 @@ namespace Pxl
             GameState.LoadContent(spriteBatch, Content);
             MainMenuState.LoadContent(spriteBatch, Content);
             GameMenuState.LoadContent(spriteBatch, Content);
+            EndMenuState.LoadContent(spriteBatch, Content);
         }
 
         protected override void Update(GameTime gameTime)
@@ -76,7 +79,9 @@ namespace Pxl
             screen.Set();
             GraphicsDevice.Clear(Color.Black);
 
+            spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp, null, null, null, Matrix.CreateScale(1f));
             CurrentState.Draw(gameTime);
+            spriteBatch.End();
 
             screen.UnSet();
             screen.Present(spriteBatch);

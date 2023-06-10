@@ -1,13 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework.Content;
 
 namespace Pxl
 {
@@ -61,7 +54,7 @@ namespace Pxl
             if (!string.IsNullOrEmpty(Text))
             {
                 var x = (Bounds.X + (Bounds.Width / 2)) - (font.MeasureString(Text).X / 2);
-                var y = (Bounds.Y + (Bounds.Height / 2)) - (font.MeasureString(Text).Y / 2);
+                var y = (Bounds.Y + (Bounds.Height / 2)) - (font.MeasureString(Text).Y / 2) - 2;
 
                 spriteBatch.DrawString(font, Text, new Vector2(x, y), textColor);
             }

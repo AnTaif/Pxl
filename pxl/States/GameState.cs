@@ -2,13 +2,6 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Pxl
 {
@@ -27,6 +20,8 @@ namespace Pxl
             model = new GameModel();
             view = new GameView();
             controller = new GameController(model, view);
+
+            LevelManager.SetOnEnd(OnEnd);
         }
 
         public void LoadContent(SpriteBatch spriteBatch, ContentManager content)
@@ -47,6 +42,11 @@ namespace Pxl
         {
             view.Update(gameTime);
             view.Draw(gameTime, model);
+        }
+
+        public void OnEnd()
+        {
+            game.ChangeState(game.EndMenuState);
         }
     }
 }

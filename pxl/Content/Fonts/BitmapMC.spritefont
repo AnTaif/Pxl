@@ -52,8 +52,13 @@ with.
     -->
     <CharacterRegions>
       <CharacterRegion>
-        <Start>&#32;</Start>
-        <End>&#126;</End>
+        <Start> </Start>
+        <End>~</End>
+      </CharacterRegion>
+
+      <CharacterRegion>
+        <Start>А</Start>
+        <End>ј</End>
       </CharacterRegion>
     </CharacterRegions>
   </Asset>

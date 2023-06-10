@@ -36,10 +36,6 @@ namespace Pxl
 
             HandleCollisionsWithLevel();
 
-            var collisionsE = CollisionManager.GetCollisionsWithPlayer(this);
-            if (collisionsE.Any(c => c.Type == CollisionType.Player && c.Direction == CollisionDirection.Top))
-                Death();
-
             Move(gameTime);
         }
 

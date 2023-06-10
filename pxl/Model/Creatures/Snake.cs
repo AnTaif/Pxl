@@ -7,18 +7,18 @@ using System.Threading.Tasks;
 
 namespace Pxl
 {
-    public class Mushroom : WalkingEnemy
+    public class Snake : WalkingEnemy
     {
-        public Mushroom(RectangleF bounds, float direction = 1, Point? leftRange = null, Point? rightRange = null) 
+        public Snake(RectangleF bounds, float direction = 1, Point? leftRange = null, Point? rightRange = null) 
             : base(bounds, direction, leftRange, rightRange)
         {
-            Speed = 40;
+            Speed = 30;
         }
 
-        public override void HandleCollisionWithEntity(CollisionInfo collision)
+        public override void HandleCollisionWithCreature(CollisionInfo collision)
         {
             if (collision.Type == CollisionType.Player && collision.Direction == CollisionDirection.Top)
-                ApplyDeath();
+                Death();
         }
     }
 }

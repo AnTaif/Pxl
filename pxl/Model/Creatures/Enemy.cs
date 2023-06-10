@@ -7,15 +7,11 @@ using System.Threading.Tasks;
 
 namespace Pxl
 {
-    public abstract class Enemy : Entity
+    public abstract class Enemy : Creature
     {
         public Enemy(RectangleF bounds) : base(bounds)
         {
             Type = CollisionType.Enemy;
-        }
-
-        protected override void Death()
-        {
         }
     }
 }

@@ -30,57 +30,39 @@ namespace Pxl
 
     public static class CollisionManager
     {
-        private static Level _level;
+        private static Level level;
         private static Tile[,] tileMap;
-        private static List<Entity> _entities;
-        private static Player player;
+        private static List<Creature> creatures;
 
         public static List<List<Rectangle>> PlayerCollisions { get; private set; }
 
-        public static void Initialize(Player player, Level level)
-        {
-            CollisionManager.player = player;
-            _level = level;
-            tileMap = _level.TileMap;
-            _entities = _level.Entities;
-        }
-
-        public static void SetPlayer(Player player)
-        {
-            CollisionManager.player = player;
-        }
-
         public static void SetLevel(Level level)
         {
-            _level = level;
-            tileMap = _level.TileMap;
-            _entities = _level.Entities;
+            CollisionManager.level = level;
+            tileMap = level.TileMap;
+            creatures = level.Creatures;
         }
 
-        public static void AddEntity(Entity entity) => _entities.Add(entity);
-
-        public static void RemoveEntity(Entity entity) => _entities.Remove(entity);
-
-        public static List<CollisionInfo> GetCollisionsWithLevel(Entity entity)
+        public static List<CollisionInfo> GetCollisionsWithLevel(ICreature creature)
         {
             var collisionsWithLevel = new List<CollisionInfo>();
 
-            var direction = entity.Velocity;
+            var direction = creature.Velocity;
 
-            entity.UpdateCollisionTiles();
+            creature.UpdateCollisionTiles();
 
             direction.Normalize();
 
             if (direction.X != 0)
             {
-                var collisionInfo = CheckHorizontalCollision(direction, entity.CollisionTiles);
+                var collisionInfo = CheckHorizontalCollision(direction, creature.CollisionTiles);
                 if (collisionInfo.Type != CollisionType.None)
                     collisionsWithLevel.Add(collisionInfo);
             }
    
             if (direction.Y != 0)
             {
-                var collisionInfo = CheckVerticalCollision(direction, entity.CollisionTiles);
+                var collisionInfo = CheckVerticalCollision(direction, creature.CollisionTiles);
                 collisionsWithLevel.Add(collisionInfo);
             }
 
@@ -168,53 +150,36 @@ namespace Pxl
         private static bool TargetDirectionSameWithCollision(CollisionDirection target, CollisionDirection collision)
             => target == CollisionDirection.All || target == collision;
 
-        public static void HandleCollisionWithEntities(IEntity entity)
+        public static void HandleCollisionWithCreatures(ICreature creature)
         {
-            foreach(var currentEntity in _entities)
+            foreach(var currentCreature in creatures)
             {
-                if (!currentEntity.IsAlive)
+                if (!currentCreature.IsAlive)
                     continue;
 
-                if (currentEntity == entity)
+                if (currentCreature == creature)
                     continue;
 
-                if (currentEntity.Collider.Intersects(entity.Collider))
+                if (currentCreature.Collider.Intersects(creature.Collider))
                 {
-                    var directionWithCurrentEntity = GetCollisionDirection(entity.Collider, currentEntity.Collider);
-                    var directionWithEntity = GetCollisionDirection(currentEntity.Collider, entity.Collider);
+                    var directionWithCurrentCreature = GetCollisionDirection(creature.Collider, currentCreature.Collider);
+                    var directionWithCreature = GetCollisionDirection(currentCreature.Collider, creature.Collider);
 
-                    entity.HandleCollisionWithEntity(new CollisionInfo(currentEntity.Type, directionWithCurrentEntity));
-                    currentEntity.HandleCollisionWithEntity(new CollisionInfo(entity.Type, directionWithEntity));
+                    creature.HandleCollisionWithCreature(new CollisionInfo(currentCreature.Type, directionWithCurrentCreature));
+                    currentCreature.HandleCollisionWithCreature(new CollisionInfo(creature.Type, directionWithCreature));
                 }
             }
         }
 
-        public static List<CollisionInfo> GetCollisionsWithPlayer(IEntity entity)
-        {
-            var collisions = new List<CollisionInfo>();
-
-            if (player.Collider.Intersects(entity.Collider))
-            {
-                var direction = GetCollisionDirection(entity.Collider, player.Collider);
-                Console.WriteLine($"Collision with Player: {direction}");
-                collisions.Add(new CollisionInfo(CollisionType.Player, direction));
-            }
-
-            return collisions;
-        }
-
         private static CollisionDirection GetCollisionDirection(Rectangle currentRect, Rectangle intersectionRect) // rect1 intersects rect2
         {
-            // Calculate the distance between the centers of the rectangles
             Vector2 centerA = new Vector2(intersectionRect.X + intersectionRect.Width / 2, intersectionRect.Y + intersectionRect.Height / 2);
             Vector2 centerB = new Vector2(currentRect.X + currentRect.Width / 2, currentRect.Y + currentRect.Height / 2);
             Vector2 distance = centerA - centerB;
 
-            // Calculate the minimum distance between the rectangles' edges
             float minDistanceX = (intersectionRect.Width + currentRect.Width) / 2;
             float minDistanceY = (intersectionRect.Height + currentRect.Height) / 2;
 
-            // Check the collision direction based on the distances
             if (Math.Abs(distance.X) < minDistanceX && Math.Abs(distance.Y) < minDistanceY)
             {
                 float offsetX = minDistanceX - Math.Abs(distance.X);
@@ -239,10 +204,10 @@ namespace Pxl
             return CollisionDirection.All;
         }
 
-        public static List<List<Rectangle>> GetCollisionTiles(Entity entity)
+        public static List<List<Rectangle>> GetCollisionTiles(Creature creature)
         {
             var collisionTiles = new List<List<Rectangle>>();
-            var collider = entity.Collider;
+            var collider = creature.Collider;
 
             var tileSize = LevelManager.TileSet.TileSize;
             var colliderPos = new Point(collider.X / tileSize, collider.Y / tileSize);

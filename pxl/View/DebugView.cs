@@ -27,7 +27,7 @@ namespace Pxl
                 $"Stage: {LevelManager.CurrentLevel.Stage} Level: {LevelManager.CurrentLevel.Id}", new Vector2(0, 60), Color.White);
 
             DrawCollisions(spriteBatch, model.Player);
-            foreach (var entity in LevelManager.CurrentLevel.Entities)
+            foreach (var entity in LevelManager.CurrentLevel.Creatures)
                 if (entity.IsAlive)
                     DrawCollisions(spriteBatch, entity);
         }
@@ -45,7 +45,7 @@ namespace Pxl
             };
         }
 
-        private void DrawCollisions(SpriteBatch spriteBatch, Entity entity)
+        private void DrawCollisions(SpriteBatch spriteBatch, Creature entity)
         {
             spriteBatch.Draw(textures["player_collision"], entity.Collider, Color.White); // Collider
             foreach (var collisionRow in entity.CollisionTiles)
